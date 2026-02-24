@@ -1,0 +1,432 @@
+.dashboard-page {
+  min-height: 100vh;
+  padding: clamp(14px, 2.5vw, 30px);
+  font-family: "Poppins", "Segoe UI", sans-serif;
+  background: var(--brand-gradient);
+}
+
+.dashboard-layout {
+  display: block;
+}
+
+.dashboard-grid {
+  width: min(1160px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.95fr);
+  gap: clamp(14px, 2.2vw, 24px);
+  align-items: start;
+}
+
+.dashboard-card {
+  width: 100%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  padding: clamp(18px, 3vw, 30px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: scale(1.03);
+  box-shadow: var(--hover-shadow);
+}
+
+.dashboard-card h1,
+.dashboard-card h2 {
+  margin: 0 0 8px 0;
+  color: var(--text-main);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.dashboard-card p {
+  margin: 0 0 8px 0;
+  color: var(--text-muted);
+}
+
+.dashboard-email {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.pickup-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+  animation: fadeInUp 0.55s ease both;
+}
+
+.pickup-form label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.pickup-form input,
+.pickup-form select,
+.pickup-form textarea {
+  width: 100%;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+  color: #14532d;
+  background: rgba(255, 255, 255, 0.95);
+  transition: border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s ease;
+}
+
+.pickup-form input::placeholder,
+.pickup-form textarea::placeholder {
+  color: #6b7280;
+}
+
+.pickup-form input:focus,
+.pickup-form select:focus,
+.pickup-form textarea:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.pickup-form textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.pickup-form button {
+  margin-top: 8px;
+  min-height: 48px;
+  background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+  color: #ffffff;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 12px 25px rgba(22, 163, 74, 0.3);
+}
+
+.pickup-form button:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 16px 28px rgba(5, 150, 105, 0.34);
+  filter: brightness(1.02);
+}
+
+.pickup-form button:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, 0.42);
+  outline-offset: 2px;
+}
+
+.pickup-form button:disabled {
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #4ade80 0%, #10b981 100%);
+  box-shadow: none;
+  opacity: 0.88;
+}
+
+.estimate-box {
+  border: 1px solid rgba(74, 222, 128, 0.5);
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.94), rgba(209, 250, 229, 0.95));
+  border-radius: 14px;
+  padding: 13px 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.estimate-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 8px;
+}
+
+.estimate-price-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 8px 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+  color: #14532d;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.dashboard-feedback {
+  margin-top: 12px;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.logout-btn {
+  margin-top: 14px;
+  background: #ef4444;
+  color: #ffffff;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.reward-total {
+  color: #166534;
+  font-weight: 600;
+}
+
+.request-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.request-item {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 14px;
+  padding: 13px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.request-item p {
+  margin: 0 0 6px 0;
+  font-size: 0.93rem;
+  color: var(--text-muted);
+}
+
+.request-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.request-top h3 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: var(--text-main);
+}
+
+.confetti-wrap {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 10px;
+  height: 16px;
+  border-radius: 3px;
+  background: #fef08a;
+  animation: confettiDrop 1.4s ease-in forwards;
+}
+
+.confetti-piece:nth-child(3n) {
+  background: #86efac;
+}
+
+.confetti-piece:nth-child(3n + 1) {
+  background: #5eead4;
+}
+
+.confetti-piece:nth-child(4n) {
+  background: #22d3ee;
+}
+
+.status-chip {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-pending {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.status-approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-on_the_way {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-accepted {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.button-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.truck-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 32px;
+  overflow: hidden;
+}
+
+.is-submitting .truck-track svg {
+  animation: truckRide 1.15s linear infinite;
+}
+
+.booking-card {
+  animation: fadeInUp 0.6s ease both;
+}
+
+.history-card {
+  animation: fadeInUp 0.7s ease both;
+}
+
+@keyframes truckRide {
+  0% {
+    transform: translateX(-18px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes confettiDrop {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(104vh) rotate(480deg);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .request-list {
+    max-height: 42vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: 12px;
+  }
+
+  .dashboard-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .pickup-form {
+    gap: 12px;
+  }
+
+  .pickup-form input,
+  .pickup-form select,
+  .pickup-form textarea {
+    padding: 11px 12px;
+  }
+
+  .request-list {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pickup-form,
+  .booking-card,
+  .history-card,
+  .is-submitting .truck-track svg,
+  .pickup-form input,
+  .pickup-form select,
+  .pickup-form textarea,
+  .pickup-form button,
+  .logout-btn {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

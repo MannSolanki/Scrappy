@@ -1,95 +1,196 @@
-import React, { useState } from 'react';
-import { Mail, Lock } from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "../styles/Auth.css";
 
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const API_BASE_URL = "http://localhost:5000";
 
-  const handleSubmit = (e: React.FormEvent) => {
+type LoginRole = "admin" | "user" | "pickup_partner";
+type LoginMode = "user" | "admin" | "pickup_partner";
+
+const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loginMode, setLoginMode] = useState<LoginMode>("user");
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt:', { email, password });
+    setMessage("");
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.message || "Login failed");
+        return;
+      }
+
+      const backendRole = String(data.user?.role || "").trim().toLowerCase();
+      if (backendRole !== "admin" && backendRole !== "user" && backendRole !== "pickup_partner") {
+        setMessage("Login response missing valid user role.");
+        return;
+      }
+
+      if (!data.token) {
+        setMessage("Login response missing authentication token.");
+        return;
+      }
+
+      const tokenToStore = data.token || "";
+
+      const normalizedUser = {
+        id: data.user?.id || data.user?._id || "",
+        name: data.user?.name || "User",
+        email: (data.user?.email || email).trim().toLowerCase(),
+        role: backendRole as LoginRole,
+        token: tokenToStore,
+        rewardPoints: Number(data.user?.rewardPoints || 0),
+      };
+
+      // Clear previous auth keys before writing fresh login state.
+      localStorage.removeItem("token");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userEmail");
+
+      // Store both token separately and within user object
+      localStorage.setItem("token", tokenToStore);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
+      localStorage.setItem("userEmail", normalizedUser.email);
+
+      window.dispatchEvent(new Event("auth-changed"));
+
+      const normalizedEmail = normalizedUser.email.trim().toLowerCase();
+      const emailIndicatesAdmin = normalizedEmail.includes("admin");
+      const shouldGoToPickupPartner = loginMode === "pickup_partner" || normalizedUser.role === "pickup_partner";
+      const shouldGoToAdmin =
+        loginMode === "admin" || normalizedUser.role === "admin" || emailIndicatesAdmin;
+
+      if (shouldGoToPickupPartner) {
+        navigate("/pickup-partner-dashboard");
+        return;
+      }
+
+      navigate(shouldGoToAdmin ? "/admin-dashboard" : "/home");
+    } catch {
+      setMessage("Unable to reach server. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2>
+          {loginMode === "admin"
+            ? "Login as Admin"
+            : loginMode === "pickup_partner"
+              ? "Login as Pickup Partner"
+              : "Login"}
+        </h2>
+
+        <div className="auth-switch" style={{ marginBottom: "0.75rem" }}>
+          <button
+            type="button"
+            onClick={() => setLoginMode("user")}
+            disabled={isLoading || loginMode === "user"}
+            className="link-button"
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              marginRight: "0.75rem",
+              color: loginMode === "user" ? "var(--brand-accent, #16a34a)" : "inherit",
+              cursor: isLoading || loginMode === "user" ? "default" : "pointer",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            Login as User
+          </button>
+          <button
+            type="button"
+            onClick={() => setLoginMode("admin")}
+            disabled={isLoading || loginMode === "admin"}
+            className="link-button"
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              color: loginMode === "admin" ? "var(--brand-accent, #16a34a)" : "inherit",
+              cursor: isLoading || loginMode === "admin" ? "default" : "pointer",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            Login as Admin
+          </button>
+          <button
+            type="button"
+            onClick={() => setLoginMode("pickup_partner")}
+            disabled={isLoading || loginMode === "pickup_partner"}
+            className="link-button"
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              marginLeft: "0.75rem",
+              color: loginMode === "pickup_partner" ? "var(--brand-accent, #16a34a)" : "inherit",
+              cursor: isLoading || loginMode === "pickup_partner" ? "default" : "pointer",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            Login as Pickup Partner
+          </button>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none rounded-lg relative block w-full pl-10 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="appearance-none rounded-lg relative block w-full pl-10 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
+        <form onSubmit={handleLogin} className="auth-form">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-            <div className="text-sm">
-              <a href="#" className="font-medium text-green-600 hover:text-green-500">
-                Forgot your password?
-              </a>
-            </div>
-          </div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              Sign in
-            </button>
-          </div>
+          {message && <p className="auth-message error">{message}</p>}
+
+          <button type="submit" disabled={isLoading}>
+            {isLoading
+              ? "Logging in..."
+              : loginMode === "admin"
+                ? "Login as Admin"
+                : loginMode === "pickup_partner"
+                  ? "Login as Pickup Partner"
+                  : "Login"}
+          </button>
         </form>
+
+        <p className="auth-switch">
+          No account? <Link to="/signup">Create one</Link>
+        </p>
       </div>
     </div>
   );

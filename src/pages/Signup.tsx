@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/Auth.css";
-
-const API_BASE_URL = "http://localhost:5000";
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();

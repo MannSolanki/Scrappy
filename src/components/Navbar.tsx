@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Moon, Recycle, Sun } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, Recycle, X } from "lucide-react";
 import "../styles/ScrappyUI.css";
 
 type StoredUser = {
@@ -13,27 +13,12 @@ type StoredUser = {
 
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<StoredUser | null>(null);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
   const normalizedRole = String(user?.role || "").trim().toLowerCase();
   const isAdmin = normalizedRole === "admin";
   const isPickupPartner = normalizedRole === "pickup_partner";
   const homeRoute = isAdmin ? "/admin-dashboard" : isPickupPartner ? "/pickup-partner-dashboard" : "/home";
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setTheme(savedTheme);
-      return;
-    }
-
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setTheme(prefersDark ? "dark" : "light");
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
   useEffect(() => {
     const syncUserFromStorage = () => {
@@ -62,44 +47,53 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
   return (
     <nav className="scrap-navbar">
-      <div className="scrap-container scrap-navbar-inner">
-        <Link to={homeRoute} className="brand">
-          <Recycle size={28} />
-          <span>EcoScrap</span>
-        </Link>
-
-        <div className="nav-links">
-          {isAdmin && (
-            <Link to="/admin-dashboard" className="nav-link">
-              Admin Dashboard
-            </Link>
-          )}
-          {isPickupPartner && (
-            <Link to="/pickup-partner-dashboard" className="nav-link">
-              Pickup Dashboard
-            </Link>
-          )}
-          {!isAdmin && !isPickupPartner && (
-            <Link to="/home" className="nav-link">
-              Home
-            </Link>
-          )}
-          <Link to="/about" className="nav-link">
-            About
-          </Link>
-          <Link to="/contact" className="nav-link">
-            Contact
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scrap-navbar-inner">
+        <div className="nav-head">
+          <Link to={homeRoute} className="brand">
+            <Recycle size={24} />
+            <span>EcoScrap</span>
           </Link>
           <button
             type="button"
-            className="theme-toggle-btn"
-            onClick={() => setTheme((previous) => (previous === "light" ? "dark" : "light"))}
-            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            className="mobile-menu-btn"
+            onClick={() => setMenuOpen((previous) => !previous)}
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={menuOpen}
           >
-            {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
+        </div>
+
+        <div className={`nav-links ${menuOpen ? "open" : ""}`}>
+          <div className="nav-links-list">
+            {isAdmin && (
+              <Link to="/admin-dashboard" className="nav-link">
+                Admin Dashboard
+              </Link>
+            )}
+            {isPickupPartner && (
+              <Link to="/pickup-partner-dashboard" className="nav-link">
+                Pickup Dashboard
+              </Link>
+            )}
+            {!isAdmin && !isPickupPartner && (
+              <Link to="/home" className="nav-link">
+                Home
+              </Link>
+            )}
+            <Link to="/about" className="nav-link">
+              About
+            </Link>
+            <Link to="/contact" className="nav-link">
+              Contact
+            </Link>
+          </div>
           <Link to={user ? homeRoute : "/login"} className="login-btn">
             {isAdmin ? "Hi Admin" : isPickupPartner ? "Pickup Partner" : user?.name ? `Hi ${user.name}` : "Login"}
           </Link>

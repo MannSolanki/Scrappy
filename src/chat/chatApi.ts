@@ -1,6 +1,5 @@
 import { ChatConversation, ChatMessage } from "./types";
-
-const API_BASE_URL = "http://localhost:5000";
+import { API_BASE_URL } from "../config/apiBaseUrl";
 
 const getStoredToken = (): string => {
   const direct = localStorage.getItem("token");

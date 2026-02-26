@@ -1,5 +1,4 @@
 import React from "react";
-import { Card, Col, Container, Row } from "react-bootstrap";
 import { CalendarClock, Gift, ListChecks, Truck } from "lucide-react";
 
 const steps = [
@@ -28,32 +27,28 @@ const steps = [
 const HowItWorksSection: React.FC = () => {
   return (
     <section className="home-section reveal-on-scroll">
-      <Container>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="home-section-header">
           <h2>How It Works</h2>
           <p>A simple four-step flow designed for fast and reliable scrap pickup.</p>
         </div>
 
-        <Row className="g-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <Col key={step.title} xs={12} sm={6} lg={3}>
-                <Card className="home-card how-card h-100">
-                  <Card.Body>
-                    <div className="home-icon-chip">
-                      <Icon size={20} />
-                    </div>
-                    <p className="home-step-label">Step {index + 1}</p>
-                    <h3>{step.title}</h3>
-                    <p>{step.description}</p>
-                  </Card.Body>
-                </Card>
-              </Col>
+              <article key={step.title} className="home-card how-card h-full rounded-xl shadow-md bg-white p-5 hover:shadow-lg transition duration-300">
+                <div className="home-icon-chip">
+                  <Icon size={20} />
+                </div>
+                <p className="home-step-label">Step {index + 1}</p>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+              </article>
             );
           })}
-        </Row>
-      </Container>
+        </div>
+      </div>
     </section>
   );
 };

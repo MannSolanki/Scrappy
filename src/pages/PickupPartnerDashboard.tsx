@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/PickupPartnerDashboard.css";
-
-const API_BASE_URL = "http://localhost:5000";
 
 type StoredUser = {
   id?: string;

@@ -1,5 +1,4 @@
 import React from "react";
-import { Card, Col, Container, Row } from "react-bootstrap";
 import { BatteryCharging, Cpu, FileText, Leaf, Recycle, Wrench } from "lucide-react";
 
 const recycleItems = [
@@ -38,31 +37,27 @@ const recycleItems = [
 const WhatWeRecycleSection: React.FC = () => {
   return (
     <section className="home-section home-section-tint reveal-on-scroll" id="what-we-recycle">
-      <Container>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="home-section-header">
           <h2>What We Recycle</h2>
           <p>We process multiple scrap streams with responsible segregation and handling.</p>
         </div>
 
-        <Row className="g-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {recycleItems.map((item) => {
             const Icon = item.icon;
             return (
-              <Col key={item.title} xs={12} sm={6} lg={4}>
-                <Card className="home-card recycle-card h-100">
-                  <Card.Body>
-                    <div className="home-icon-chip">
-                      <Icon size={20} />
-                    </div>
-                    <h3>{item.title}</h3>
-                    <p>{item.description}</p>
-                  </Card.Body>
-                </Card>
-              </Col>
+              <article key={item.title} className="home-card recycle-card h-full rounded-xl shadow-md bg-white p-5 hover:shadow-lg transition duration-300">
+                <div className="home-icon-chip">
+                  <Icon size={20} />
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </article>
             );
           })}
-        </Row>
-      </Container>
+        </div>
+      </div>
     </section>
   );
 };

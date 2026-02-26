@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button, Container } from "react-bootstrap";
 import HowItWorksSection from "../components/home/HowItWorksSection";
 import ImpactStatsSection from "../components/home/ImpactStatsSection";
 import IndustriesSection from "../components/home/IndustriesSection";
@@ -38,7 +37,7 @@ const Home: React.FC = () => {
     <div className="home-page">
       <section className="home-hero">
         <div className="home-hero-overlay" />
-        <Container className="home-hero-content">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 home-hero-content">
           <p className="home-hero-badge hero-fade hero-fade-1">EcoScrap Platform</p>
           <h1 className="hero-fade hero-fade-2">Turn Scrap Into Value</h1>
           <p className="home-hero-subtitle hero-fade hero-fade-3">
@@ -46,18 +45,17 @@ const Home: React.FC = () => {
             responsible recycling, and transparent rewards.
           </p>
           <div className="home-hero-actions hero-fade hero-fade-4">
-            <Button
-              as={Link}
+            <Link
               to={isLoggedIn ? "/dashboard" : "/login"}
               className="hero-btn hero-btn-primary"
             >
               Schedule Pickup <ArrowRight size={18} />
-            </Button>
-            <Button as="a" href="#what-we-recycle" className="hero-btn hero-btn-secondary">
+            </Link>
+            <a href="#what-we-recycle" className="hero-btn hero-btn-secondary">
               Check Scrap Price
-            </Button>
+            </a>
           </div>
-        </Container>
+        </div>
       </section>
 
       <HowItWorksSection />

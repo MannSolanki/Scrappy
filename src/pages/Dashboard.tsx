@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/Dashboard.css";
 import { CalendarClock, Coins, MapPin, Recycle, Truck, Weight } from "lucide-react";
-
-const API_BASE_URL = "http://localhost:5000";
 
 type ScrapType = "plastic" | "metal" | "paper" | "e-waste";
 

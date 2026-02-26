@@ -1,6 +1,5 @@
 import { AdminUser, ScrapRequest } from './types';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../config/apiBaseUrl';
 
 const getStoredToken = (): string => {
   const directToken = localStorage.getItem('token');

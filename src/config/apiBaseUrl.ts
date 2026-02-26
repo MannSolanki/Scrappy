@@ -1,6 +1,13 @@
 const explicitApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 
-// In production, default to same-origin `/api` unless an explicit backend URL is provided.
-const fallbackApiUrl = import.meta.env.PROD ? '/api' : 'https://your-backend-url.com';
+const normalizeApiBase = (value: string) =>
+  value
+    .replace(/\/+$/, '')
+    .replace(/\/api$/, '');
 
-export const API_BASE_URL = explicitApiUrl || fallbackApiUrl;
+// In production, default to same-origin `/api` unless an explicit backend URL is provided.
+const fallbackApiUrl = import.meta.env.PROD ? '/api' : '';
+
+export const API_BASE_URL = explicitApiUrl
+  ? normalizeApiBase(explicitApiUrl)
+  : fallbackApiUrl;

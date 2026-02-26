@@ -12,36 +12,17 @@ const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const allowedOrigins = [
-  // dynamic URL from env (may be localhost or deployed)
-  process.env.CLIENT_URL,
-  // actual production frontend
-  "https://ecoscrap-app.netlify.app",
-  // common local dev ports
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:3000",
-  "http://localhost:3001",
-].filter(Boolean);
 
 // ✅ Connect Database
 connectDB();
 
 // ✅ Middlewares FIRST
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-  })
-);
-
-// handle pre-flight requests globally
-app.options("*", cors());
+// permissive CORS configuration per request
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+}));
 
 app.use(express.json());
 

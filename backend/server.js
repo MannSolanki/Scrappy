@@ -13,11 +13,11 @@ const chatRoutes = require("./routes/chatRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
-  // allow URL from environment (could be localhost or deployed client)
+  // dynamic URL from env (may be localhost or deployed)
   process.env.CLIENT_URL,
-  // production frontend on Netlify
+  // actual production frontend
   "https://ecoscrap-app.netlify.app",
-  // common localhost dev ports (Vite default 5173/5174, React 3000 etc.)
+  // common local dev ports
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
@@ -31,7 +31,6 @@ connectDB();
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps or curl)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -41,7 +40,7 @@ app.use(
   })
 );
 
-// enable pre-flight across-the-board
+// handle pre-flight requests globally
 app.options("*", cors());
 
 app.use(express.json());

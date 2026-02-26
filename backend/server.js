@@ -12,12 +12,28 @@ const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "https://your-netlify-site-url.netlify.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+].filter(Boolean);
 
 // ✅ Connect Database
 connectDB();
 
 // ✅ Middlewares FIRST
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ✅ Routes AFTER middlewares
@@ -29,7 +45,7 @@ app.use("/api/chat", chatRoutes);
 
 // ✅ Test route
 app.get("/", (_req, res) => {
-  res.send("Scrappy backend is running");
+  res.send("API Running");
 });
 
 // ✅ Start server

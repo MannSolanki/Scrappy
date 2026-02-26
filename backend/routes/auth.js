@@ -37,8 +37,7 @@ const buildAuthToken = (user) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 };
 
-// Keep auth behavior simple so existing working flow does not break.
-router.post("/signup", async (req, res) => {
+const handleSignup = async (req, res) => {
   try {
     const { email, password, role, adminKey } = req.body;
 
@@ -77,7 +76,11 @@ router.post("/signup", async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: "Server error" });
   }
-});
+};
+
+// Keep auth behavior simple so existing working flow does not break.
+router.post("/signup", handleSignup);
+router.post("/register", handleSignup);
 
 router.post("/login", async (req, res) => {
   try {

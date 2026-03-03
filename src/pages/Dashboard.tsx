@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/Dashboard.css";
 import { CalendarClock, Coins, MapPin, Recycle, Truck, Weight } from "lucide-react";
@@ -185,7 +186,12 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="dashboard-page dashboard-layout">
+    <motion.div
+      className="dashboard-page dashboard-layout"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
       {showConfetti && (
         <div className="confetti-wrap" aria-hidden="true">
           {Array.from({ length: 20 }).map((_, index) => (
@@ -201,7 +207,12 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       <div className="dashboard-grid">
-        <section className="dashboard-card booking-card">
+        <motion.section
+          className="dashboard-card booking-card"
+          initial={{ opacity: 0, y: 44 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.12, ease: "easeOut" }}
+        >
           <h1>Smart Scrap Pickup Booking</h1>
           <p className="dashboard-email">Signed in as {user?.email || "Unknown user"}</p>
 
@@ -263,7 +274,16 @@ const Dashboard: React.FC = () => {
               />
             </label>
 
-            <div className="estimate-box" aria-live="polite">
+            <motion.div
+              className="estimate-box stats-card"
+              aria-live="polite"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.24, ease: "easeOut" }}
+            >
+              <span className="stat-icon-circle" aria-hidden="true">
+                <Coins size={17} />
+              </span>
               <div className="estimate-heading">
                 <Coins size={16} aria-hidden="true" />
                 Estimated Payout
@@ -273,9 +293,27 @@ const Dashboard: React.FC = () => {
                 Reward Points:{" "}
                 <strong>{Math.round(Number(formData.estimatedWeightKg || 0) * 10)}</strong>
               </p>
-            </div>
+            </motion.div>
 
-            <button type="submit" disabled={isSubmitting} className={isSubmitting ? "is-submitting" : ""}>
+            <motion.button
+              type="submit"
+              disabled={isSubmitting}
+              className={isSubmitting ? "is-submitting" : ""}
+              whileHover={isSubmitting ? undefined : { scale: 1.02, y: -2 }}
+              whileTap={isSubmitting ? undefined : { scale: 0.98 }}
+              animate={isSubmitting ? undefined : { y: [0, -2, 0] }}
+              transition={
+                isSubmitting
+                  ? { duration: 0.4 }
+                  : {
+                      duration: 0.8,
+                      repeat: Infinity,
+                      repeatType: "loop",
+                      repeatDelay: 2.6,
+                      ease: "easeInOut",
+                    }
+              }
+            >
               {isSubmitting ? (
                 <span className="button-loading">
                   <span className="truck-track" aria-hidden="true">
@@ -286,30 +324,65 @@ const Dashboard: React.FC = () => {
               ) : (
                 "Request Pickup"
               )}
-            </button>
+            </motion.button>
           </form>
 
           {feedback && <p className="dashboard-feedback">{feedback}</p>}
 
-          <button type="button" onClick={handleLogout} className="logout-btn">
+          <motion.button
+            type="button"
+            onClick={handleLogout}
+            className="logout-btn"
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.4 }}
+          >
             Logout
-          </button>
-        </section>
+          </motion.button>
+        </motion.section>
 
-        <section className="dashboard-card history-card">
+        <motion.section
+          className="dashboard-card history-card"
+          initial={{ opacity: 0, y: 44 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.22, ease: "easeOut" }}
+        >
           <h2>Your Pickup Requests</h2>
-          <p className="reward-total">
-            Total Rewards: <strong>{totalRewards}</strong> points
-          </p>
+          <motion.div
+            className="reward-total stats-card"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.3, ease: "easeOut" }}
+          >
+            <span className="stat-icon-circle" aria-hidden="true">
+              <Recycle size={16} />
+            </span>
+            <p>
+              Total Rewards: <strong>{totalRewards}</strong> points
+            </p>
+          </motion.div>
 
           {isLoadingHistory ? (
-            <p>Loading requests...</p>
+            <motion.p
+              className="history-loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+            >
+              Loading requests...
+            </motion.p>
           ) : requests.length === 0 ? (
             <p>No pickup requests yet.</p>
           ) : (
             <div className="request-list">
-              {requests.map((request) => (
-                <article key={request._id} className="request-item">
+              {requests.map((request, index) => (
+                <motion.article
+                  key={request._id}
+                  className="request-item"
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.28 + index * 0.06, ease: "easeOut" }}
+                >
                   <div className="request-top">
                     <h3>{request.scrapType.toUpperCase()}</h3>
                     <span className={`status-chip status-${request.status.toLowerCase()}`}>
@@ -321,13 +394,13 @@ const Dashboard: React.FC = () => {
                   <p>Points: {request.rewardPoints}</p>
                   <p>Address: {request.address}</p>
                   <p>Pickup: {new Date(request.preferredPickupDateTime).toLocaleString()}</p>
-                </article>
+                </motion.article>
               ))}
             </div>
           )}
-        </section>
+        </motion.section>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

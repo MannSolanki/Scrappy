@@ -20,7 +20,7 @@ const industries = [
   {
     title: "Industries",
     image:
-      "https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=1000&q=80",
+      "https://media.istockphoto.com/id/683503676/photo/thermal-power-plant.webp?s=2048x2048&w=is&k=20&c=Aknr_Vh63v-_yA95_G1ZBKVUsioDHV-TCt9mogAYSL0=",
   },
 ];
 

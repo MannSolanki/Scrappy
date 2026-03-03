@@ -145,14 +145,16 @@ function SupportChatWidget() {
 
   return (
     <>
-      <Button
-        type="button"
-        className="support-floating-btn"
-        aria-label="Open support chat"
-        onClick={() => setShow(true)}
-      >
-        <FiMessageCircle size={20} />
-      </Button>
+      <div className="support-chat-wrapper">
+        <Button
+          type="button"
+          className="support-floating-btn"
+          aria-label="Open support chat"
+          onClick={() => setShow(true)}
+        >
+          <FiMessageCircle size={20} />
+        </Button>
+      </div>
 
       <Modal show={show} onHide={() => setShow(false)} centered dialogClassName="support-chat-modal">
         <Modal.Header className="support-chat-header">

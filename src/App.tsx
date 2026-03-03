@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
+import PageLoader from './components/PageLoader';
 import ProtectedRoute, { getUserRole, isAuthenticated } from './components/ProtectedRoute';
 import SupportChatWidget from './components/SupportChatWidget';
 import About from './pages/About';
@@ -51,6 +52,7 @@ const GuestOnlyRoute = ({ children }: { children: JSX.Element }) => {
 function AppLayout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin-dashboard');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll('.fade-on-scroll, .reveal-on-scroll'));
@@ -74,8 +76,18 @@ function AppLayout() {
     return () => observer.disconnect();
   }, [location.pathname]);
 
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [location]);
+
   return (
     <div className="site-shell">
+      {loading && <PageLoader />}
       {!isAdminRoute && <Navbar />}
       <main className="site-main">
         <Routes>

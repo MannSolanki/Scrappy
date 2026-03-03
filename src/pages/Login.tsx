@@ -93,6 +93,7 @@ const Login: React.FC = () => {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <p className="auth-subtitle">Welcome back to your eco dashboard</p>
         <h2>
           {loginMode === "admin"
             ? "Login as Admin"
@@ -101,82 +102,67 @@ const Login: React.FC = () => {
               : "Login"}
         </h2>
 
-        <div className="auth-switch" style={{ marginBottom: "0.75rem" }}>
+        <div className="auth-tabs" role="tablist" aria-label="Login type">
           <button
             type="button"
             onClick={() => setLoginMode("user")}
             disabled={isLoading || loginMode === "user"}
-            className="link-button"
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              marginRight: "0.75rem",
-              color: loginMode === "user" ? "var(--brand-accent, #16a34a)" : "inherit",
-              cursor: isLoading || loginMode === "user" ? "default" : "pointer",
-              textDecoration: "underline",
-              fontWeight: 600,
-            }}
+            className={`auth-tab ${loginMode === "user" ? "active" : ""}`}
+            aria-pressed={loginMode === "user"}
           >
-            Login as User
+            User
           </button>
           <button
             type="button"
             onClick={() => setLoginMode("admin")}
             disabled={isLoading || loginMode === "admin"}
-            className="link-button"
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              color: loginMode === "admin" ? "var(--brand-accent, #16a34a)" : "inherit",
-              cursor: isLoading || loginMode === "admin" ? "default" : "pointer",
-              textDecoration: "underline",
-              fontWeight: 600,
-            }}
+            className={`auth-tab ${loginMode === "admin" ? "active" : ""}`}
+            aria-pressed={loginMode === "admin"}
           >
-            Login as Admin
+            Admin
           </button>
           <button
             type="button"
             onClick={() => setLoginMode("pickup_partner")}
             disabled={isLoading || loginMode === "pickup_partner"}
-            className="link-button"
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              marginLeft: "0.75rem",
-              color: loginMode === "pickup_partner" ? "var(--brand-accent, #16a34a)" : "inherit",
-              cursor: isLoading || loginMode === "pickup_partner" ? "default" : "pointer",
-              textDecoration: "underline",
-              fontWeight: 600,
-            }}
+            className={`auth-tab ${loginMode === "pickup_partner" ? "active" : ""}`}
+            aria-pressed={loginMode === "pickup_partner"}
           >
-            Login as Pickup Partner
+            Pickup Partner
           </button>
         </div>
 
         <form onSubmit={handleLogin} className="auth-form">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="auth-input-group">
+            <span className="auth-input-icon" aria-hidden="true">@</span>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <span className="auth-input-line" aria-hidden="true" />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="auth-input-group">
+            <span className="auth-input-icon" aria-hidden="true">*</span>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <span className="password-visual-toggle" aria-hidden="true">
+              Show
+            </span>
+            <span className="auth-input-line" aria-hidden="true" />
+          </div>
 
           {message && <p className="auth-message error">{message}</p>}
 
-          <button type="submit" disabled={isLoading}>
+          <button type="submit" disabled={isLoading} className="auth-submit-btn">
             {isLoading
               ? "Logging in..."
               : loginMode === "admin"
@@ -188,7 +174,7 @@ const Login: React.FC = () => {
         </form>
 
         <p className="auth-switch">
-          No account? <Link to="/signup">Create one</Link>
+          No account? <Link to="/signup">Create account</Link>
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import { FiSearch, FiSend, FiSmile, FiTrash2 } from "react-icons/fi";
+import { FiSearch, FiSmile, FiTrash2 } from "react-icons/fi";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data";
 import {
@@ -270,7 +270,7 @@ function SupportChatPanel() {
         {feedback && <p className="chat-feedback">{feedback}</p>}
 
         <div className="admin-chat-compose">
-          <div className="chat-input-wrap">
+          <div className="chat-input-wrap chat-input-wrapper">
             <button
               type="button"
               className="emoji-btn"
@@ -298,7 +298,9 @@ function SupportChatPanel() {
               onClick={() => void handleSend()}
               disabled={!selectedUserId || !draft.trim()}
             >
-              <FiSend size={16} />
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                <path d="M2 21L23 12 2 3 2 10 17 12 2 14z" />
+              </svg>
             </Button>
           </div>
 

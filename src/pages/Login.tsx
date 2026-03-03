@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/Auth.css";
@@ -10,6 +11,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loginMode, setLoginMode] = useState<LoginMode>("user");
@@ -146,17 +148,23 @@ const Login: React.FC = () => {
           </div>
 
           <div className="auth-input-group">
-            <span className="auth-input-icon" aria-hidden="true">*</span>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <span className="password-visual-toggle" aria-hidden="true">
-              Show
-            </span>
+            <div className="password-field-shell">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="password-visual-toggle"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+              </button>
+            </div>
             <span className="auth-input-line" aria-hidden="true" />
           </div>
 

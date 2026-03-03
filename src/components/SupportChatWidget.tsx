@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import { FiMessageCircle, FiSend, FiSmile, FiX } from "react-icons/fi";
+import { FiMessageCircle, FiSmile, FiX } from "react-icons/fi";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data";
 import { fetchChatMessages, sendChatMessage, setTyping } from "../chat/chatApi";
@@ -204,7 +204,7 @@ function SupportChatWidget() {
         </Modal.Body>
 
         <Modal.Footer className="support-chat-footer">
-          <div className="chat-input-wrap">
+          <div className="chat-input-wrap chat-input-wrapper">
             <button
               type="button"
               className="emoji-btn"
@@ -225,7 +225,13 @@ function SupportChatWidget() {
               }}
             />
             <Button type="button" className="send-btn" onClick={() => void handleSend()} disabled={!draft.trim()}>
-              <FiSend size={16} />
+              {isLoading ? (
+                <div className="loader-small" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                  <path d="M2 21L23 12 2 3 2 10 17 12 2 14z" />
+                </svg>
+              )}
             </Button>
           </div>
 

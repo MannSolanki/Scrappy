@@ -162,19 +162,75 @@
 }
 
 .password-visual-toggle {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #2f8c55;
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(74, 146, 97, 0.36);
-  background: rgba(255, 255, 255, 0.9);
-  pointer-events: none;
+  width: 54px;
+  min-width: 54px;
+  border: 0;
+  border-left: 1px solid #c3d7ca;
+  background: #f5f5f5;
+  color: #5f6f66;
+  pointer-events: auto;
   user-select: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0;
+  padding: 0;
+  box-shadow: none;
+  position: static;
+  overflow: visible;
+  isolation: auto;
+  transform: none;
+  transition: background-color 0.22s ease, color 0.22s ease, transform 0.22s ease;
+}
+
+.password-field-shell {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 1px solid #c3d7ca;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.86);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.password-field-shell input {
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  padding: 12px 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.password-field-shell input:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.password-field-shell:focus-within {
+  border-color: #2f8c55;
+  box-shadow: 0 0 0 3px rgba(92, 170, 120, 0.24), 0 6px 16px rgba(44, 92, 61, 0.1);
+}
+
+.password-field-shell .password-visual-toggle:hover {
+  background: #efefef;
+  color: #33423a;
+}
+
+.password-field-shell .password-visual-toggle:active {
+  transform: scale(0.96);
+}
+
+.password-field-shell .password-visual-toggle:focus-visible {
+  outline: 2px solid #2f8c55;
+  outline-offset: -2px;
+}
+
+.password-field-shell .password-visual-toggle::before,
+.password-field-shell .password-visual-toggle::after {
+  content: none;
 }
 
 .auth-form button {
@@ -429,8 +485,7 @@
   }
 
   .password-visual-toggle {
-    right: 10px;
-    font-size: 0.72rem;
-    padding: 2px 7px;
+    width: 50px;
+    min-width: 50px;
   }
 }

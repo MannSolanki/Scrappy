@@ -19,6 +19,13 @@ const Navbar: React.FC = () => {
   const normalizedRole = String(user?.role || "").trim().toLowerCase();
   const isAdmin = normalizedRole === "admin";
   const isPickupPartner = normalizedRole === "pickup_partner";
+  const mobileGreeting = isAdmin
+    ? "Hi Admin"
+    : isPickupPartner
+      ? "Pickup Partner"
+      : user?.name
+        ? `Hi ${user.name}`
+        : "";
   const homeRoute = isAdmin ? "/admin-dashboard" : isPickupPartner ? "/pickup-partner-dashboard" : "/home";
 
   useEffect(() => {
@@ -57,7 +64,7 @@ const Navbar: React.FC = () => {
 
   return (
     <motion.nav
-      className="scrap-navbar"
+      className={`scrap-navbar ${menuOpen ? "menu-open" : ""}`}
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: "easeOut" }}
@@ -74,55 +81,83 @@ const Navbar: React.FC = () => {
             type="button"
             className="mobile-menu-btn"
             onClick={() => setMenuOpen((previous) => !previous)}
-            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-label="Toggle navigation menu"
             aria-expanded={menuOpen}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             transition={{ duration: 0.4 }}
           >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            <Menu size={20} />
           </motion.button>
         </div>
 
         <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-          <div className="nav-links-list">
-            {isAdmin && (
+          <div className="nav-links-content">
+            <div className="dropdown-head">
+              <span className="dropdown-title">Menu</span>
+              <button
+                type="button"
+                className="mobile-menu-close-btn"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close navigation menu"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {user && <p className="mobile-greeting">{mobileGreeting}</p>}
+
+            <div className="nav-links-list">
+              {isAdmin && (
+                <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }}>
+                  <Link to="/admin-dashboard" className={navItemClass("/admin-dashboard")}>
+                    Admin Dashboard
+                  </Link>
+                </motion.div>
+              )}
+              {isPickupPartner && (
+                <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }}>
+                  <Link to="/pickup-partner-dashboard" className={navItemClass("/pickup-partner-dashboard")}>
+                    Pickup Dashboard
+                  </Link>
+                </motion.div>
+              )}
+              {!isAdmin && !isPickupPartner && (
+                <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }}>
+                  <Link to="/home" className={navItemClass("/home")}>
+                    Home
+                  </Link>
+                </motion.div>
+              )}
               <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }}>
-                <Link to="/admin-dashboard" className={navItemClass("/admin-dashboard")}>
-                  Admin Dashboard
+                <Link to="/about" className={navItemClass("/about")}>
+                  About
                 </Link>
               </motion.div>
-            )}
-            {isPickupPartner && (
               <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }}>
-                <Link to="/pickup-partner-dashboard" className={navItemClass("/pickup-partner-dashboard")}>
-                  Pickup Dashboard
+                <Link to="/contact" className={navItemClass("/contact")}>
+                  Contact
                 </Link>
               </motion.div>
-            )}
-            {!isAdmin && !isPickupPartner && (
-              <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }}>
-                <Link to="/home" className={navItemClass("/home")}>
-                  Home
-                </Link>
-              </motion.div>
-            )}
-            <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }}>
-              <Link to="/about" className={navItemClass("/about")}>
-                About
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }}>
-              <Link to="/contact" className={navItemClass("/contact")}>
-                Contact
+              {!user && (
+                <motion.div whileHover={{ y: -1 }} transition={{ duration: 0.4 }} className="mobile-login-link-wrap">
+                  <Link to="/login" className={navItemClass("/login")}>
+                    Login
+                  </Link>
+                </motion.div>
+              )}
+            </div>
+            <motion.div
+              className="desktop-auth-btn"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Link to={user ? homeRoute : "/login"} className="login-btn">
+                {isAdmin ? "Hi Admin" : isPickupPartner ? "Pickup Partner" : user?.name ? `Hi ${user.name}` : "Login"}
               </Link>
             </motion.div>
           </div>
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.4 }}>
-            <Link to={user ? homeRoute : "/login"} className="login-btn">
-              {isAdmin ? "Hi Admin" : isPickupPartner ? "Pickup Partner" : user?.name ? `Hi ${user.name}` : "Login"}
-            </Link>
-          </motion.div>
         </div>
       </div>
     </motion.nav>

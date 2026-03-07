@@ -1,6 +1,6 @@
 .support-chat-wrapper {
   position: fixed;
-  bottom: 20px;
+  bottom: max(20px, env(safe-area-inset-bottom));
   right: 20px;
   z-index: 9999;
 }
@@ -12,7 +12,7 @@
 .support-floating-btn {
   position: fixed;
   right: 20px;
-  bottom: 22px;
+  bottom: max(22px, calc(env(safe-area-inset-bottom) + 12px));
   z-index: 1050;
   width: 56px;
   height: 56px;
@@ -457,14 +457,38 @@
 
 @media (max-width: 576px) {
   .support-floating-btn {
-    right: 14px;
-    bottom: 14px;
+    right: 12px;
+    bottom: max(72px, calc(env(safe-area-inset-bottom) + 62px));
     width: 52px;
     height: 52px;
   }
 
+  .support-chat-wrapper {
+    right: 12px;
+    bottom: max(68px, calc(env(safe-area-inset-bottom) + 58px));
+  }
+
+  .support-chat-modal .modal-dialog {
+    margin: 0.9rem;
+  }
+
   .chat-bubble {
     max-width: 86%;
+  }
+}
+
+@media (max-width: 480px) {
+  .support-floating-btn {
+    width: 50px;
+    height: 50px;
+    right: 10px;
+    bottom: max(78px, calc(env(safe-area-inset-bottom) + 66px));
+    box-shadow: 0 12px 28px rgba(5, 96, 45, 0.33);
+  }
+
+  .support-chat-wrapper {
+    right: 10px;
+    bottom: max(74px, calc(env(safe-area-inset-bottom) + 62px));
   }
 }
 

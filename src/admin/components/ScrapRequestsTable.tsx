@@ -56,7 +56,7 @@ function ScrapRequestsTable({ requests, isUpdating, onUpdateStatus }: ScrapReque
                     <td className="admin-action-cell">
                       <button
                         type="button"
-                        className="admin-btn approve"
+                        className="admin-btn approve approve-btn"
                         disabled={!isPending || isUpdating}
                         onClick={() => onUpdateStatus(request._id || request.id || '', 'approved')}
                       >
@@ -64,7 +64,7 @@ function ScrapRequestsTable({ requests, isUpdating, onUpdateStatus }: ScrapReque
                       </button>
                       <button
                         type="button"
-                        className="admin-btn reject"
+                        className="admin-btn reject reject-btn"
                         disabled={!isPending || isUpdating}
                         onClick={() => onUpdateStatus(request._id || request.id || '', 'rejected')}
                       >

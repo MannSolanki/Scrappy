@@ -152,7 +152,7 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="admin-page">
+    <div className="admin-page dashboard-container">
       <AdminSidebar
         activeSection={activeSection}
         onSectionChange={setActiveSection}
@@ -160,8 +160,8 @@ function AdminDashboard() {
 
       <section className="admin-content">
         <header className="admin-content-header">
-          <h1>Admin Dashboard</h1>
-          <p>Manage users and monitor scrap requests from one place.</p>
+          <h1 className="dashboard-title">Admin Dashboard</h1>
+          <p className="subtitle">Manage users and monitor scrap requests from one place.</p>
         </header>
 
         {error && <div className="admin-alert">{error}</div>}

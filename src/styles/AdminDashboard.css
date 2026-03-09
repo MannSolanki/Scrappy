@@ -1,18 +1,28 @@
 .admin-page {
-  min-height: calc(100vh - 120px);
+  min-height: 100vh;
   display: flex;
-  background: var(--brand-gradient);
+  background: #f9fafb;
+}
+
+.dashboard-container {
+  background:
+    radial-gradient(circle at 8% 10%, rgba(34, 197, 94, 0.08), transparent 35%),
+    radial-gradient(circle at 92% 88%, rgba(16, 185, 129, 0.07), transparent 33%),
+    #f9fafb;
 }
 
 .admin-sidebar {
   width: 264px;
-  background: linear-gradient(165deg, #0f5132 0%, #166534 45%, #15803d 100%);
+  background: linear-gradient(180deg, rgba(22, 101, 52, 0.95), rgba(21, 128, 61, 0.92));
   color: #f8fff9;
-  padding: 28px 20px;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  box-shadow: 8px 0 24px rgba(6, 37, 20, 0.24);
+  gap: 24px;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .admin-brand {
@@ -29,44 +39,46 @@
 
 .admin-nav-item {
   border: 0;
-  border-radius: 11px;
+  border-radius: 12px;
   background: transparent;
   color: #d8f3df;
-  padding: 12px 14px;
+  padding: 10px 16px;
   text-align: left;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
 }
 
 .admin-nav-item:hover {
   background: rgba(255, 255, 255, 0.16);
   color: #ffffff;
-  transform: translateX(2px);
+  transform: translateX(4px);
 }
 
 .admin-nav-item.active {
   background: rgba(255, 255, 255, 0.22);
   color: #ffffff;
+  font-weight: 700;
 }
 
 .admin-content {
   flex: 1;
-  padding: 30px;
+  padding: 32px;
   overflow-x: auto;
 }
 
-.admin-content-header h1 {
+.dashboard-title {
   margin: 0;
-  font-size: clamp(1.72rem, 3vw, 2.1rem);
+  font-size: clamp(1.75rem, 3vw, 2.1rem);
+  font-weight: 600;
   color: #134e2d;
   letter-spacing: -0.01em;
 }
 
-.admin-content-header p {
+.subtitle {
   margin: 8px 0 0;
-  color: #3e6350;
+  color: #6b7280;
 }
 
 .admin-alert {
@@ -106,21 +118,20 @@
 
 .admin-stat-card,
 .admin-table-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 14px 28px rgba(15, 81, 50, 0.12);
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #ecf3ee;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 .admin-stat-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .admin-stat-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 20px 32px rgba(10, 70, 35, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  border-color: #d7eadd;
 }
 
 .admin-stat-top {
@@ -203,11 +214,14 @@
 
 .admin-table-wrap {
   overflow-x: auto;
+  border-radius: 14px;
 }
 
 .admin-table {
   width: 100%;
   border-collapse: collapse;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .admin-table th,
@@ -222,6 +236,8 @@
   text-transform: uppercase;
   letter-spacing: 0.4px;
   color: #4f6f5e;
+  background: #f0fdf4;
+  font-weight: 600;
 }
 
 .admin-table td {
@@ -233,6 +249,10 @@
   text-align: center;
   color: #64748b;
   font-style: italic;
+}
+
+.admin-table tbody tr:hover {
+  background: #f7fcf8;
 }
 
 .admin-role-pill {
@@ -292,8 +312,8 @@
 
 .admin-btn {
   border: 0;
-  border-radius: 10px;
-  padding: 8px 14px;
+  border-radius: 999px;
+  padding: 6px 14px;
   font-size: 0.83rem;
   font-weight: 700;
   cursor: pointer;
@@ -345,6 +365,13 @@
   box-shadow: 0 10px 24px rgba(22, 101, 52, 0.3);
 }
 
+.approve-btn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+
 .admin-btn.approve:hover:not(:disabled) {
   transform: translateY(-2px) scale(1.05);
   box-shadow:
@@ -374,6 +401,13 @@
   background: linear-gradient(135deg, #DC2626 0%, #EF4444 45%, #F87171 100%);
   color: #ffffff;
   box-shadow: 0 10px 24px rgba(220, 38, 38, 0.3);
+}
+
+.reject-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 6px 14px;
 }
 
 .admin-btn.reject:hover:not(:disabled) {

@@ -1,9 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Phone } from "lucide-react";
 import "../styles/ScrappyUI.css";
 
 const Footer: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      const loggedIn = localStorage.getItem("isLoggedIn") === "true" || Boolean(localStorage.getItem("user"));
+      setIsLoggedIn(loggedIn);
+    };
+
+    syncAuthState();
+    window.addEventListener("auth-changed", syncAuthState);
+    window.addEventListener("storage", syncAuthState);
+
+    return () => {
+      window.removeEventListener("auth-changed", syncAuthState);
+      window.removeEventListener("storage", syncAuthState);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
+    window.dispatchEvent(new Event("auth-changed"));
+    window.location.href = "/";
+  };
+
   return (
     <footer className="scrap-footer">
       <div className="scrap-container">
@@ -21,7 +47,13 @@ const Footer: React.FC = () => {
             <div className="footer-links">
               <Link to="/about">About Us</Link>
               <Link to="/contact">Contact</Link>
-              <Link to="/login">Login</Link>
+              {isLoggedIn ? (
+                <button type="button" className="footer-logout" onClick={handleLogout}>
+                  Logout
+                </button>
+              ) : (
+                <Link to="/login">Login</Link>
+              )}
             </div>
           </div>
 

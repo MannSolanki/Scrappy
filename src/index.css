@@ -258,3 +258,117 @@ a {
   font-weight: 700;
   padding: 0.28rem 0.62rem;
 }
+
+/* Shared glossy style for primary action buttons and button-like links */
+.button,
+.primary-btn,
+.btn-primary,
+.btn-submit,
+.auth-submit-btn,
+.hero-btn-primary,
+.user-profile-btn,
+.partner-actions button,
+.pickup-form button,
+.auth-form button,
+button:not(.mobile-menu-btn):not(.mobile-menu-close-btn):not(.password-visual-toggle):not(.auth-tab):not(.btn-outline):not(.btn-secondary):not(.secondary-btn) {
+  position: relative;
+  border-radius: 999px;
+  border: none;
+  font-weight: 500;
+  color: #ffffff;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease, background 0.3s ease;
+  cursor: pointer;
+}
+
+.button::before,
+.primary-btn::before,
+.btn-primary::before,
+.btn-submit::before,
+.auth-submit-btn::before,
+.hero-btn-primary::before,
+.user-profile-btn::before,
+.partner-actions button::before,
+.pickup-form button::before,
+.auth-form button::before,
+button:not(.mobile-menu-btn):not(.mobile-menu-close-btn):not(.password-visual-toggle):not(.auth-tab):not(.btn-outline):not(.btn-secondary):not(.secondary-btn)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: none;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.button::after,
+.primary-btn::after,
+.btn-primary::after,
+.btn-submit::after,
+.auth-submit-btn::after,
+.hero-btn-primary::after,
+.user-profile-btn::after,
+.partner-actions button::after,
+.pickup-form button::after,
+.auth-form button::after,
+button:not(.mobile-menu-btn):not(.mobile-menu-close-btn):not(.password-visual-toggle):not(.auth-tab):not(.btn-outline):not(.btn-secondary):not(.secondary-btn)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+
+.button:hover:not(:disabled),
+.primary-btn:hover:not(:disabled),
+.btn-primary:hover:not(:disabled),
+.btn-submit:hover:not(:disabled),
+.auth-submit-btn:hover:not(:disabled),
+.hero-btn-primary:hover:not(:disabled),
+.user-profile-btn:hover:not(:disabled),
+.partner-actions button:hover:not(:disabled),
+.pickup-form button:hover:not(:disabled),
+.auth-form button:hover:not(:disabled),
+button:not(.mobile-menu-btn):not(.mobile-menu-close-btn):not(.password-visual-toggle):not(.auth-tab):not(.btn-outline):not(.btn-secondary):not(.secondary-btn):hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(34, 197, 94, 0.45);
+  filter: brightness(1.02);
+}
+
+.button:hover::after,
+.primary-btn:hover::after,
+.btn-primary:hover::after,
+.btn-submit:hover::after,
+.auth-submit-btn:hover::after,
+.hero-btn-primary:hover::after,
+.user-profile-btn:hover::after,
+.partner-actions button:hover::after,
+.pickup-form button:hover::after,
+.auth-form button:hover::after,
+button:not(.mobile-menu-btn):not(.mobile-menu-close-btn):not(.password-visual-toggle):not(.auth-tab):not(.btn-outline):not(.btn-secondary):not(.secondary-btn):hover::after {
+  left: 120%;
+  transition: left 0.7s ease;
+}
+
+.button:active:not(:disabled),
+.primary-btn:active:not(:disabled),
+.btn-primary:active:not(:disabled),
+.btn-submit:active:not(:disabled),
+.auth-submit-btn:active:not(:disabled),
+.hero-btn-primary:active:not(:disabled),
+.user-profile-btn:active:not(:disabled),
+.partner-actions button:active:not(:disabled),
+.pickup-form button:active:not(:disabled),
+.auth-form button:active:not(:disabled),
+button:not(.mobile-menu-btn):not(.mobile-menu-close-btn):not(.password-visual-toggle):not(.auth-tab):not(.btn-outline):not(.btn-secondary):not(.secondary-btn):active:not(:disabled) {
+  transform: scale(0.95);
+}

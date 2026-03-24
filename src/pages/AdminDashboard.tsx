@@ -7,7 +7,8 @@ import ScrapRequestsTable from '../admin/components/ScrapRequestsTable';
 import SupportChatPanel from '../admin/components/SupportChatPanel';
 import StatsCards from '../admin/components/StatsCards';
 import UsersTable from '../admin/components/UsersTable';
-import { AdminSection, AdminUser, ScrapRequest } from '../admin/types';
+import WasteDistributionChart from '../admin/components/WasteDistributionChart';
+import { AdminSection, AdminUser, ScrapRequest, WasteDistributionDataPoint } from '../admin/types';
 import '../styles/AdminDashboard.css';
 
 function AdminDashboard() {
@@ -108,6 +109,48 @@ function AdminDashboard() {
     return Math.round((approvedRequests / requests.length) * 100);
   }, [approvedRequests, requests.length]);
 
+  const wasteDistributionData = useMemo<WasteDistributionDataPoint[]>(() => {
+    const categoryTotals: Record<string, number> = {
+      Plastic: 0,
+      Paper: 0,
+      Metal: 0,
+      Glass: 0,
+      Others: 0,
+    };
+
+    requests.forEach((request) => {
+      const scrapType = (request.scrapType || '').trim().toLowerCase();
+      const rawWeight = Number(request.estimatedWeightKg ?? request.weightKg ?? 0);
+      const amount = Number.isFinite(rawWeight) && rawWeight > 0 ? rawWeight : 0;
+
+      switch (scrapType) {
+        case 'plastic':
+          categoryTotals.Plastic += amount;
+          break;
+        case 'paper':
+          categoryTotals.Paper += amount;
+          break;
+        case 'metal':
+          categoryTotals.Metal += amount;
+          break;
+        case 'glass':
+          categoryTotals.Glass += amount;
+          break;
+        case 'e-waste':
+        default:
+          if (scrapType) {
+            categoryTotals.Others += amount;
+          }
+          break;
+      }
+    });
+
+    return Object.entries(categoryTotals).map(([name, value]) => ({
+      name,
+      value: Number(value.toFixed(1)),
+    }));
+  }, [requests]);
+
   const handleStatusUpdate = async (
     requestId: string,
     status: 'approved' | 'rejected'
@@ -186,7 +229,10 @@ function AdminDashboard() {
 
             {activeSection === 'dashboard' && (
               <div className="admin-panels-grid">
-                <MonthlyOrdersChart />
+                <div className="admin-charts-grid">
+                  <MonthlyOrdersChart />
+                  <WasteDistributionChart data={wasteDistributionData} />
+                </div>
 
                 <UsersTable users={users.slice(0, 6)} />
                 <ScrapRequestsTable

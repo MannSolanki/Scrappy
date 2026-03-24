@@ -18,10 +18,17 @@ export interface ScrapRequest {
   id?: string;
   user?: ScrapRequestUser | string;
   status: string;
+  scrapType?: string;
   estimatedWeightKg?: number;
   weightKg?: number;
   estimatedPrice?: number;
   totalPrice?: number;
   price?: number;
   createdAt?: string;
+}
+
+export interface WasteDistributionDataPoint {
+  name: string;
+  value: number;
+  color?: string;
 }

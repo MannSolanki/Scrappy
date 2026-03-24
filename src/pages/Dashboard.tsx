@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/Dashboard.css";
-import { CalendarClock, Coins, MapPin, Recycle, Truck, Weight } from "lucide-react";
+import { CalendarClock, MapPin, Recycle, Truck, Wallet, Weight } from "lucide-react";
 
 type ScrapType = "plastic" | "metal" | "paper" | "e-waste";
 
@@ -281,12 +281,11 @@ const Dashboard: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.24, ease: "easeOut" }}
             >
-              <span className="stat-icon-circle" aria-hidden="true">
-                <Coins size={17} />
-              </span>
               <div className="estimate-heading">
-                <Coins size={16} aria-hidden="true" />
-                Estimated Payout
+                <span className="estimate-icon" aria-hidden="true">
+                  <Wallet size={18} />
+                </span>
+                <span>Estimated Payout</span>
               </div>
               <p className="estimate-price-badge">Rs.{estimatedPrice.toFixed(2)}</p>
               <p>
@@ -332,7 +331,7 @@ const Dashboard: React.FC = () => {
           <motion.button
             type="button"
             onClick={handleLogout}
-            className="logout-btn"
+            className="dashboard-logout-btn"
             whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.4 }}

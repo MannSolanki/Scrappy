@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
-import { FiMessageCircle, FiSmile, FiX } from "react-icons/fi";
+import { Modal } from "react-bootstrap";
+import { FiMessageCircle, FiSend, FiSmile, FiX } from "react-icons/fi";
 import Picker from "@emoji-mart/react";
 import emojiData from "@emoji-mart/data";
 import { fetchChatMessages, sendChatMessage, setTyping } from "../chat/chatApi";
@@ -37,6 +37,7 @@ function SupportChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [isTypingVisible, setIsTypingVisible] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -56,6 +57,36 @@ function SupportChatWidget() {
 
   const isUserRole = String(currentUser?.role || "").toLowerCase() === "user";
   const canShowWidget = localStorage.getItem("isLoggedIn") === "true" && isUserRole;
+
+  const messageItems = useMemo(() => {
+    let previousDay = "";
+
+    return messages.flatMap((message) => {
+      const day = formatSeparator(message.createdAt);
+      const items: Array<
+        | { type: "day"; key: string; label: string }
+        | { type: "message"; key: string; message: ChatMessage; mine: boolean }
+      > = [];
+
+      if (day !== previousDay) {
+        items.push({
+          type: "day",
+          key: `day-${message._id}`,
+          label: day,
+        });
+        previousDay = day;
+      }
+
+      items.push({
+        type: "message",
+        key: message._id,
+        message,
+        mine: message.senderRole === "user",
+      });
+
+      return items;
+    });
+  }, [messages]);
 
   useEffect(() => {
     const refreshAuthState = () => setAuthVersion((prev) => prev + 1);
@@ -126,6 +157,7 @@ function SupportChatWidget() {
     if (!text) return;
 
     try {
+      setIsSending(true);
       await sendChatMessage(text);
       setDraft("");
       setShowEmojiPicker(false);
@@ -134,6 +166,8 @@ function SupportChatWidget() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to send message";
       setFeedback(message);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -141,70 +175,93 @@ function SupportChatWidget() {
     return null;
   }
 
-  let previousDay = "";
-
   return (
     <>
       <div className="support-chat-wrapper">
-        <Button
+        <button
           type="button"
           className="support-floating-btn"
           aria-label="Open support chat"
           onClick={() => setShow(true)}
         >
           <FiMessageCircle size={20} />
-        </Button>
+        </button>
       </div>
 
-      <Modal show={show} onHide={() => setShow(false)} centered dialogClassName="support-chat-modal">
+      <Modal show={show} onHide={() => setShow(false)} dialogClassName="support-chat-modal">
         <Modal.Header className="support-chat-header">
-          <Modal.Title>Support Chat</Modal.Title>
-          <button
-            type="button"
-            className="support-close-btn"
-            onClick={() => setShow(false)}
-            aria-label="Close support chat"
-          >
-            <FiX size={18} />
-          </button>
+          <div className="support-chat-header-main">
+            <div className="support-chat-title-group">
+              <span className="support-chat-badge" aria-hidden="true">
+                <FiMessageCircle size={18} />
+              </span>
+              <div>
+                <Modal.Title>Support Chat</Modal.Title>
+                <div className="support-chat-status">
+                  <span className="support-chat-status-dot" />
+                  <span>Online</span>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="support-close-btn"
+              onClick={() => setShow(false)}
+              aria-label="Close support chat"
+            >
+              <FiX size={18} />
+            </button>
+          </div>
         </Modal.Header>
 
         <Modal.Body className="support-chat-body">
           {isLoading ? (
-            <p className="chat-feedback">Loading messages...</p>
+            <div className="support-chat-loading">
+              <p className="chat-feedback">Loading messages...</p>
+            </div>
           ) : (
             <div className="chat-scroll-wrap">
-              {messages.map((message) => {
-                const day = formatSeparator(message.createdAt);
-                const showDay = day !== previousDay;
-                previousDay = day;
-                const mine = message.senderRole === "user";
+              {messageItems.map((item) => {
+                if (item.type === "day") {
+                  return (
+                    <div key={item.key} className="chat-day-separator">
+                      {item.label}
+                    </div>
+                  );
+                }
 
                 return (
-                  <React.Fragment key={message._id}>
-                    {showDay && <div className="chat-day-separator">{day}</div>}
-                    <div className={`chat-row ${mine ? "mine" : "other"} chat-fade-in`}>
-                      <div className={`chat-bubble ${mine ? "mine" : "other"}`}>
-                        <p>{message.message}</p>
-                        <div className="chat-meta">
-                          <span>{formatTime(message.createdAt)}</span>
-                          {mine && <span>{message.seenStatus ? "Seen" : "Delivered"}</span>}
-                        </div>
+                  <div key={item.key} className={`chat-row ${item.mine ? "mine" : "other"} chat-fade-in`}>
+                    <div className={`chat-message-stack ${item.mine ? "mine" : "other"}`}>
+                      <div className={`chat-bubble ${item.mine ? "mine" : "other"}`}>
+                        <p>{item.message.message}</p>
+                      </div>
+                      <div className={`chat-meta ${item.mine ? "mine" : "other"}`}>
+                        <span>{formatTime(item.message.createdAt)}</span>
+                        {item.mine && <span>{item.message.seenStatus ? "Seen" : "Delivered"}</span>}
                       </div>
                     </div>
-                  </React.Fragment>
+                  </div>
                 );
               })}
 
-              {isTypingVisible && <p className="chat-typing">Admin is typing...</p>}
+              {isTypingVisible && (
+                <div className="chat-row other chat-fade-in">
+                  <div className="chat-typing-bubble" aria-label="Support is typing">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                </div>
+              )}
               <div ref={bottomRef} />
             </div>
           )}
-          {feedback && <p className="chat-feedback">{feedback}</p>}
+          {feedback && <p className="chat-feedback support-chat-feedback">{feedback}</p>}
         </Modal.Body>
 
         <Modal.Footer className="support-chat-footer">
-          <div className="chat-input-wrap chat-input-wrapper">
+          <div className="chat-input-wrap chat-input-wrapper support-chat-input-wrapper">
             <button
               type="button"
               className="emoji-btn"
@@ -213,7 +270,7 @@ function SupportChatWidget() {
             >
               <FiSmile size={18} />
             </button>
-            <Form.Control
+            <input
               value={draft}
               onChange={(event) => void handleDraftChange(event.target.value)}
               placeholder="Type your message..."
@@ -224,19 +281,17 @@ function SupportChatWidget() {
                 }
               }}
             />
-            <Button type="button" className="send-btn" onClick={() => void handleSend()} disabled={!draft.trim()}>
-              {isLoading ? (
+            <button type="button" className="send-btn" onClick={() => void handleSend()} disabled={!draft.trim() || isSending}>
+              {isSending ? (
                 <div className="loader-small" />
               ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-                  <path d="M2 21L23 12 2 3 2 10 17 12 2 14z" />
-                </svg>
+                <FiSend size={18} />
               )}
-            </Button>
+            </button>
           </div>
 
           {showEmojiPicker && (
-            <div className="emoji-picker-wrap">
+            <div className="emoji-picker-wrap support-chat-emoji-picker">
               <Picker
                 data={emojiData}
                 onEmojiSelect={(emoji: { native?: string }) =>

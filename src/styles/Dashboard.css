@@ -282,7 +282,9 @@
   border: 1px solid rgba(74, 222, 128, 0.5);
   background: linear-gradient(135deg, rgba(236, 253, 245, 0.72), rgba(209, 250, 229, 0.6));
   border-radius: 18px;
-  padding: 15px 16px;
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
@@ -316,18 +318,31 @@
 .estimate-heading {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.86rem;
+  gap: 10px;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #065f46;
-  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.estimate-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #047857;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.15);
 }
 
 .estimate-price-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0 0 8px 0;
+  margin: 0;
   padding: 8px 12px;
   border-radius: 999px;
   background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
@@ -337,15 +352,19 @@
   letter-spacing: 0.02em;
 }
 
+.estimate-box p:last-child {
+  margin: 0;
+}
+
 .dashboard-feedback {
   margin-top: 12px;
   color: #065f46;
   font-weight: 600;
 }
 
-.logout-btn {
+button.dashboard-logout-btn {
   margin-top: 14px;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
   border: 0;
   border-radius: 999px;
@@ -354,17 +373,19 @@
   font-size: 0.95rem;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
-  box-shadow: 0 6px 15px rgba(239, 68, 68, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 8px 18px rgba(220, 38, 38, 0.3);
   position: relative;
   overflow: hidden;
   isolation: isolate;
 }
 
-.logout-btn::before {
+button.dashboard-logout-btn::before {
   content: none;
 }
 
-.logout-btn::after {
+button.dashboard-logout-btn::after {
   content: "";
   position: absolute;
   top: 0;
@@ -376,17 +397,19 @@
   pointer-events: none;
 }
 
-.logout-btn:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.45);
-  filter: brightness(1.02);
+button.dashboard-logout-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 10px 22px rgba(185, 28, 28, 0.38);
+  filter: brightness(0.98);
 }
 
-.logout-btn:active:not(:disabled) {
+button.dashboard-logout-btn:active:not(:disabled) {
   transform: scale(0.95);
 }
 
-.logout-btn:hover::after {
+button.dashboard-logout-btn:hover::after {
   left: 120%;
   transition: left 0.7s ease;
 }
@@ -747,7 +770,7 @@
   .pickup-form select,
   .pickup-form textarea,
   .pickup-form button,
-  .logout-btn {
+  .dashboard-logout-btn {
     animation: none !important;
     transition: none !important;
     transform: none !important;

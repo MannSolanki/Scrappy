@@ -8,6 +8,7 @@ const authRoutes = require("./routes/auth");
 const scrapRequestRoutes = require("./routes/scrapRequests");
 const adminRoutes = require("./routes/adminRoutes");
 const pickupPartnerRoutes = require("./routes/pickupPartnerRoutes");
+const agentRoutes = require("./routes/agentRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/scrap-requests", scrapRequestRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/pickup-partner", pickupPartnerRoutes);
+app.use("/api/agent", agentRoutes);
 app.use("/api/chat", chatRoutes);
 
 // ✅ Test route

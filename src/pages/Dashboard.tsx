@@ -1,11 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/Dashboard.css";
-import { CalendarClock, MapPin, Recycle, Truck, Wallet, Weight } from "lucide-react";
-
-type ScrapType = "plastic" | "metal" | "paper" | "e-waste";
+import { CalendarClock, MapPin, Recycle, Truck, Calculator, CheckCircle2, Weight, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 
 type StoredUser = {
   id: string;
@@ -15,24 +13,48 @@ type StoredUser = {
   rewardPoints?: number;
 };
 
+type PricingRule = {
+  category: string;
+  minWeight: number;
+  maxWeight: number;
+  pricePerKg: number;
+};
+
+type MarketReason = {
+  category: string;
+  status: 'High' | 'Low' | 'Stable';
+  reasonText: string;
+};
+
 type ScrapRequest = {
   _id: string;
-  scrapType: ScrapType;
+  scrapType: string;
   estimatedWeightKg: number;
   address: string;
   preferredPickupDateTime: string;
   ratePerKg: number;
   estimatedPrice: number;
   rewardPoints: number;
-  status: "pending" | "approved" | "on_the_way" | "rejected" | "completed";
+  status: "pending" | "approved" | "accepted" | "on_the_way" | "reached" | "rejected" | "completed";
   createdAt: string;
 };
 
-const RATE_CARD: Record<ScrapType, number> = {
-  plastic: 10,
-  metal: 25,
-  paper: 8,
-  "e-waste": 15,
+const CATEGORIES = [
+  { value: 'plastic', label: 'Plastic' },
+  { value: 'metal', label: 'Metal' },
+  { value: 'paper', label: 'Paper' },
+  { value: 'ewaste', label: 'E-Waste' },
+  { value: 'glass', label: 'Glass' },
+  { value: 'others', label: 'Others' }
+];
+
+const DEFAULT_RATES: Record<string, number> = {
+  'plastic': 8,
+  'metal': 25,
+  'paper': 10,
+  'ewaste': 15,
+  'glass': 5,
+  'others': 6
 };
 
 const Dashboard: React.FC = () => {
@@ -44,20 +66,56 @@ const Dashboard: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(true);
+  
+  const [showPriceInfo, setShowPriceInfo] = useState<boolean>(false);
+  
   const [formData, setFormData] = useState({
-    scrapType: "plastic" as ScrapType,
+    scrapType: "plastic",
     estimatedWeightKg: "",
     address: "",
     preferredPickupDateTime: "",
   });
+
+  const [pricingRules, setPricingRules] = useState<PricingRule[]>([]);
+  const [marketReasons, setMarketReasons] = useState<MarketReason[]>([]);
+
+  // Market Fluctuation Logic (±5-10% based on category and time)
+  const calculateMarketFluctuation = (baseRate: number, category: string) => {
+    // Generate a pseudo-random multiplier between 0.9 and 1.1 based on category and current hour
+    const seed = category.charCodeAt(0) + new Date().getHours();
+    const fluctuation = 0.9 + (seed % 21) * 0.01; // 0.9 to 1.1 (±10%)
+    return baseRate * fluctuation;
+  };
+
+  const currentRule = useMemo(() => {
+    const weight = Number(formData.estimatedWeightKg) || 0;
+    return pricingRules.find(
+      (r) =>
+        r.category.toLowerCase().replace(/[^a-z]/g, "") === formData.scrapType &&
+        weight >= r.minWeight &&
+        (r.maxWeight === null || r.maxWeight === undefined || r.maxWeight === 0 ? Infinity : r.maxWeight) > weight
+    );
+  }, [pricingRules, formData.scrapType, formData.estimatedWeightKg]);
+
+  const currentRate = useMemo(() => {
+    // Use fallback rate if no rule found
+    const baseRate = currentRule ? currentRule.pricePerKg : (DEFAULT_RATES[formData.scrapType] || 0);
+    
+    // Apply market fluctuation
+    return calculateMarketFluctuation(baseRate, formData.scrapType);
+  }, [currentRule, formData.scrapType]);
+
+  const currentReason = useMemo(() => {
+    return marketReasons.find((r) => r.category.toLowerCase().replace(/[^a-z]/g, "") === formData.scrapType);
+  }, [marketReasons, formData.scrapType]);
 
   const estimatedPrice = useMemo(() => {
     const weight = Number(formData.estimatedWeightKg);
     if (!Number.isFinite(weight) || weight <= 0) {
       return 0;
     }
-    return weight * RATE_CARD[formData.scrapType];
-  }, [formData.estimatedWeightKg, formData.scrapType]);
+    return weight * currentRate;
+  }, [formData.estimatedWeightKg, currentRate]);
 
   const authHeaders = useMemo(() => {
     const token = user?.token || "";
@@ -74,6 +132,22 @@ const Dashboard: React.FC = () => {
     localStorage.removeItem("userEmail");
     window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
+  };
+
+  const loadPricingData = async (headers: Record<string, string>) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/pricing`, {
+        method: "GET",
+        headers,
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPricingRules(data.data.rules || []);
+        setMarketReasons(data.data.reasons || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch pricing data. Using fallbacks.", err);
+    }
   };
 
   const loadRequests = async (headers: Record<string, string>) => {
@@ -117,10 +191,14 @@ const Dashboard: React.FC = () => {
 
       setUser(parsedUser);
       setTotalRewards(Number(parsedUser.rewardPoints || 0));
-      loadRequests({
+      
+      const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${parsedUser.token}`,
-      });
+      };
+      
+      loadRequests(headers);
+      loadPricingData(headers);
     } catch {
       navigate("/login");
     }
@@ -150,6 +228,8 @@ const Dashboard: React.FC = () => {
         body: JSON.stringify({
           ...formData,
           estimatedWeightKg: Number(formData.estimatedWeightKg),
+          ratePerKg: currentRate,
+          estimatedPrice: estimatedPrice,
         }),
       });
 
@@ -223,10 +303,11 @@ const Dashboard: React.FC = () => {
                 Scrap Type
               </span>
               <select name="scrapType" value={formData.scrapType} onChange={handleChange} required>
-                <option value="plastic">Plastic (Rs.10/kg)</option>
-                <option value="metal">Metal (Rs.25/kg)</option>
-                <option value="paper">Paper (Rs.8/kg)</option>
-                <option value="e-waste">E-waste (Rs.15/kg)</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -281,17 +362,93 @@ const Dashboard: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.24, ease: "easeOut" }}
             >
-              <div className="estimate-heading">
-                <span className="estimate-icon" aria-hidden="true">
-                  <Wallet size={18} />
-                </span>
-                <span>Estimated Payout</span>
+              <div className="estimate-row-main">
+                <div className="estimate-primary">
+                  <div className="estimate-heading">
+                    <span className="estimate-icon" aria-hidden="true">
+                      <Calculator size={18} />
+                    </span>
+                    <span>Estimated Payout</span>
+                  </div>
+                  
+                  <div className="payout-breakdown">
+                    <div className="breakdown-row">
+                      <span>Rate:</span>
+                      <strong>₹{currentRate.toFixed(2)}/kg</strong>
+                      <div className="info-wrap">
+                        <button
+                          type="button"
+                          className="price-info-btn"
+                          onMouseEnter={() => setShowPriceInfo(true)}
+                          onMouseLeave={() => setShowPriceInfo(false)}
+                          onClick={() => setShowPriceInfo(!showPriceInfo)}
+                        >
+                          <Info size={14} />
+                        </button>
+                        <AnimatePresence>
+                          {showPriceInfo && (
+                             <motion.div 
+                               className="price-info-tooltip"
+                               initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                               animate={{ opacity: 1, scale: 1, y: 0 }}
+                               exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                             >
+                               <h5>Pricing Explanation</h5>
+                               <p>Scrap prices change based on:</p>
+                               <ul>
+                                 <li>Market demand</li>
+                                 <li>Recycling cost</li>
+                                 <li>Material quality</li>
+                                 <li>Transportation cost</li>
+                               </ul>
+                               <div className="tooltip-note">"Price may vary based on market demand, recycling cost, and supply."</div>
+                             </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                    <div className="breakdown-row">
+                      <span>Weight:</span>
+                      <strong>{formData.estimatedWeightKg || "0"} kg</strong>
+                    </div>
+                    <div className="breakdown-row total-row">
+                      <span>Total Payout:</span>
+                      <strong className={estimatedPrice > 500 ? "high-value" : ""}>
+                        ₹{estimatedPrice.toFixed(2)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="estimate-subtext">
+                    {currentRule && (
+                       <span className={`status-pill ${currentReason?.status?.toLowerCase() || 'stable'}`}>
+                          {currentReason?.status === 'High' ? <TrendingUp size={12} /> : currentReason?.status === 'Low' ? <TrendingDown size={12} /> : <Minus size={12} />}
+                          {currentReason?.status || 'Stable'}
+                       </span>
+                    )}
+                  </div>
+                </div>
+
+                {currentReason && (
+                   <div className="market-insight-box">
+                      <div className="insight-header">
+                        <TrendingUp size={14} />
+                        <span>Market Insight</span>
+                      </div>
+                      <p className="insight-text">"{currentReason.reasonText}"</p>
+                   </div>
+                )}
               </div>
-              <p className="estimate-price-badge">Rs.{estimatedPrice.toFixed(2)}</p>
-              <p>
-                Reward Points:{" "}
-                <strong>{Math.round(Number(formData.estimatedWeightKg || 0) * 10)}</strong>
-              </p>
+
+              <div className="estimate-footer-stats">
+                <p>
+                  Reward Points:{" "}
+                  <strong>{Math.round(Number(formData.estimatedWeightKg || 0) * 10)}</strong>
+                </p>
+                {Number(formData.estimatedWeightKg) >= 20 && (
+                   <span className="best-price-badge">✨ Best Price Applied</span>
+                )}
+              </div>
             </motion.div>
 
             <motion.button
@@ -354,7 +511,7 @@ const Dashboard: React.FC = () => {
             transition={{ duration: 0.55, delay: 0.3, ease: "easeOut" }}
           >
             <span className="stat-icon-circle" aria-hidden="true">
-              <Recycle size={16} />
+              <CheckCircle2 size={16} />
             </span>
             <p>
               Total Rewards: <strong>{totalRewards}</strong> points
@@ -389,7 +546,7 @@ const Dashboard: React.FC = () => {
                     </span>
                   </div>
                   <p>Weight: {request.estimatedWeightKg} kg</p>
-                  <p>Price: Rs.{Number(request.estimatedPrice).toFixed(2)}</p>
+                  <p>Price: ₹{Number(request.estimatedPrice).toFixed(2)}</p>
                   <p>Points: {request.rewardPoints}</p>
                   <p>Address: {request.address}</p>
                   <p>Pickup: {new Date(request.preferredPickupDateTime).toLocaleString()}</p>

@@ -1,210 +1,235 @@
-.partner-page {
-  min-height: 100vh;
-  padding: clamp(14px, 2.5vw, 28px);
-  background: var(--brand-gradient);
+.pickup-partner-shell {
+  background:
+    radial-gradient(circle at top left, rgba(148, 163, 184, 0.1), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.05), transparent 26%),
+    linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
+  font-family: "Poppins", "Segoe UI", sans-serif;
 }
 
-.partner-card {
-  width: min(1080px, 100%);
-  margin: 0 auto;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(10px);
-  padding: clamp(16px, 2.8vw, 24px);
+.pickup-stat-card,
+.pickup-request-card {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow:
+    0 10px 22px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
-.partner-header h1 {
-  margin: 0;
-  color: #14532d;
-  font-size: clamp(1.4rem, 3.5vw, 2rem);
+.pickup-request-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.partner-header p {
-  margin: 8px 0 0;
-  color: #166534;
+.pickup-request-card:hover {
+  transform: translateY(-4px);
+  border-color: #d1d5db;
+  box-shadow:
+    0 16px 36px rgba(15, 23, 42, 0.08),
+    0 6px 12px rgba(15, 23, 42, 0.04);
 }
 
-.partner-feedback {
-  margin: 14px 0;
-  color: #065f46;
-  font-weight: 600;
-}
-
-.partner-loading {
-  margin-top: 16px;
-  color: #166534;
-}
-
-.partner-request-list {
-  display: grid;
-  gap: 14px;
-  margin-top: 14px;
-}
-
-.partner-request-item {
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.34);
-  border-radius: 12px;
-  padding: 14px;
-  backdrop-filter: blur(8px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.partner-request-item:hover {
-  transform: scale(1.03);
-  box-shadow: var(--hover-shadow);
-}
-
-.partner-request-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.partner-request-top h2 {
-  margin: 0;
-  font-size: 1.04rem;
-  color: #14532d;
-}
-
-.partner-request-grid {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.partner-request-grid p {
-  margin: 0;
-  color: #166534;
-}
-
-.partner-status {
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.partner-status.status-approved {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.partner-status.status-on_the_way {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.partner-status.status-completed {
-  background: #bbf7d0;
-  color: #166534;
-}
-
-.partner-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.partner-actions button {
-  border: 0;
-  border-radius: 10px;
-  padding: 9px 14px;
-  font-weight: 700;
-  cursor: pointer;
-  background: linear-gradient(135deg, #1f9d55 0%, #26b466 45%, #15803d 100%);
-  color: #ffffff;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
-  box-shadow: 0 10px 24px rgba(22, 101, 52, 0.3);
+.pickup-ripple-btn {
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
-.partner-actions button::before {
+.pickup-ripple-btn:active {
+  transform: scale(0.97);
+}
+
+.pickup-ripple-content {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.pickup-ripple-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.pickup-ripple {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0);
+  animation: pickup-ripple 0.65s ease-out forwards;
+}
+
+.pickup-progress-step {
+  position: relative;
+  text-align: center;
+}
+
+.pickup-progress-dot {
+  width: 14px;
+  height: 14px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: #d1d5db;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(209, 213, 219, 0.95);
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pickup-progress-dot.is-complete {
+  background: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+
+.pickup-progress-dot.is-current {
+  transform: scale(1.12);
+}
+
+.pickup-progress-line {
+  position: absolute;
+  top: 6px;
+  left: calc(50% + 9px);
+  width: calc(100% - 4px);
+  height: 2px;
+  background: #e5e7eb;
+}
+
+.pickup-progress-line.is-complete {
+  background: #10b981;
+}
+
+.pickup-address-link {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.pickup-address-link:hover {
+  color: #1f2937;
+  text-decoration: underline;
+  text-decoration-color: rgba(31, 41, 55, 0.35);
+  text-underline-offset: 3px;
+}
+
+.pickup-address-card {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pickup-address-card:hover {
+  border-color: #d1d5db;
+}
+
+.pickup-map-button {
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #10b981;
+  transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.pickup-map-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #059669;
+}
+
+.pickup-action-btn {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.pickup-action-btn:hover {
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+}
+
+.pickup-action-btn-primary {
+  border: 1px solid #16a34a;
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.pickup-action-btn-primary:hover {
+  background: #15803d;
+  border-color: #15803d;
+}
+
+.pickup-action-btn-neutral {
+  border: 1px solid #d1d5db;
+  background: #111827;
+  color: #ffffff;
+}
+
+.pickup-action-btn-neutral:hover {
+  background: #0f172a;
+}
+
+.pickup-action-btn-secondary {
+  border: 1px solid #111827;
+  background: #ffffff;
+  color: #111827;
+}
+
+.pickup-action-btn-secondary:hover {
+  background: #f9fafb;
+}
+
+.pickup-map-topbar,
+.pickup-map-sheet {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.pickup-map-sheet {
+  box-shadow: 0 -20px 60px rgba(15, 23, 42, 0.18);
+}
+
+.pickup-skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.pickup-skeleton-shimmer::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    110deg,
-    rgba(255, 255, 255, 0) 20%,
-    rgba(255, 255, 255, 0.34) 45%,
-    rgba(255, 255, 255, 0) 70%
-  );
-  transform: translateX(-130%);
-  transition: transform 0.6s ease;
-  pointer-events: none;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: pickup-shimmer 1.4s infinite;
 }
 
-.partner-actions button::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  pointer-events: none;
+@keyframes pickup-ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
-.partner-actions button:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow:
-    0 14px 28px rgba(22, 101, 52, 0.4),
-    0 0 16px rgba(34, 197, 94, 0.35),
-    0 0 24px rgba(34, 197, 94, 0.2);
-  filter: brightness(1.02);
-}
-
-.partner-actions button:hover:not(:disabled)::before {
-  transform: translateX(130%);
-}
-
-.partner-actions button:active:not(:disabled) {
-  transform: scale(0.94);
-  box-shadow: 0 6px 12px rgba(22, 101, 52, 0.26);
-}
-
-.partner-actions button:active:not(:disabled)::after {
-  width: 200px;
-  height: 200px;
-  opacity: 1;
-  transition: width 0.25s ease, height 0.25s ease, opacity 0.25s ease;
-}
-
-.partner-actions .complete-btn {
-  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 45%, #06b6d4 100%);
-  box-shadow: 0 10px 24px rgba(13, 148, 136, 0.3);
-}
-
-.partner-actions .complete-btn:hover:not(:disabled) {
-  box-shadow:
-    0 14px 28px rgba(13, 148, 136, 0.4),
-    0 0 16px rgba(20, 184, 166, 0.35),
-    0 0 24px rgba(20, 184, 166, 0.2);
-}
-
-.partner-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-  transform: none !important;
-  box-shadow: 0 6px 14px rgba(22, 101, 52, 0.1) !important;
+@keyframes pickup-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @media (max-width: 768px) {
-  .partner-request-grid {
-    grid-template-columns: 1fr;
+  .pickup-progress-line {
+    width: calc(100% - 2px);
   }
+}
 
-  .partner-actions {
-    flex-direction: column;
+@media (prefers-reduced-motion: reduce) {
+  .pickup-request-card,
+  .pickup-ripple,
+  .pickup-skeleton-shimmer::after,
+  .pickup-progress-dot {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }

@@ -1,7 +1,6 @@
-import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-type UserRole = 'admin' | 'user' | 'pickup_partner';
+type UserRole = 'admin' | 'user' | 'pickup_partner' | 'pickup_agent';
 
 type StoredUser = {
   name?: string;
@@ -41,8 +40,8 @@ const isAuthenticated = (): boolean => {
 const getUserRole = (): UserRole | null => {
   const user = getStoredUser();
   const normalizedRole = String(user?.role || '').trim().toLowerCase();
-  if (normalizedRole === 'admin' || normalizedRole === 'user' || normalizedRole === 'pickup_partner') {
-    return normalizedRole;
+  if (normalizedRole === 'admin' || normalizedRole === 'user' || normalizedRole === 'pickup_partner' || normalizedRole === 'pickup_agent') {
+    return normalizedRole as UserRole;
   }
   return null;
 };

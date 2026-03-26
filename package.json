@@ -12,6 +12,7 @@
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
+    "@react-google-maps/api": "^2.20.8",
     "axios": "^1.13.5",
     "bootstrap": "^5.3.8",
     "cors": "^2.8.6",

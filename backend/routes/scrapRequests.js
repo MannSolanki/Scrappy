@@ -9,7 +9,9 @@ const RATE_CARD = {
   plastic: 10,
   metal: 25,
   paper: 8,
-  "e-waste": 15,
+  ewaste: 15,
+  glass: 5,
+  others: 6
 };
 
 const POINTS_PER_KG = 10;
@@ -17,11 +19,12 @@ const POINTS_PER_KG = 10;
 router.post("/", authMiddleware, async (req, res) => {
   try {
     const { scrapType, estimatedWeightKg, address, preferredPickupDateTime } = req.body;
+    const normalizedScrapType = scrapType ? String(scrapType).toLowerCase().replace(/[^a-z]/g, "") : "";
     const weight = Number(estimatedWeightKg);
-    const ratePerKg = RATE_CARD[scrapType];
+    const ratePerKg = RATE_CARD[normalizedScrapType];
 
     if (!ratePerKg) {
-      return res.status(400).json({ message: "Invalid scrap type" });
+      return res.status(400).json({ message: "Invalid scrap type. Please select a valid category." });
     }
     if (!Number.isFinite(weight) || weight <= 0) {
       return res.status(400).json({ message: "Estimated weight must be greater than 0" });
@@ -38,7 +41,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
     const request = await ScrapRequest.create({
       user: req.user._id,
-      scrapType,
+      scrapType: normalizedScrapType,
       estimatedWeightKg: weight,
       address: String(address).trim(),
       preferredPickupDateTime,
@@ -76,7 +79,7 @@ router.get("/my-requests", authMiddleware, async (req, res) => {
 router.patch("/:id/status", authMiddleware, adminAuth, async (req, res) => {
   try {
     const { status } = req.body;
-    const allowedStatuses = ["pending", "approved", "on_the_way", "rejected", "completed"];
+    const allowedStatuses = ["pending", "approved", "accepted", "on_the_way", "reached", "rejected", "completed"];
 
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });

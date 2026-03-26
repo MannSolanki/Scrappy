@@ -238,7 +238,11 @@ function SupportChatWidget() {
                       </div>
                       <div className={`chat-meta ${item.mine ? "mine" : "other"}`}>
                         <span>{formatTime(item.message.createdAt)}</span>
-                        {item.mine && <span>{item.message.seenStatus ? "Seen" : "Delivered"}</span>}
+                        {item.mine && (
+                          <span className={`seen-status ${item.message.seenStatus ? "is-seen" : ""}`}>
+                            {item.message.seenStatus ? "✓✓" : "✓"}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

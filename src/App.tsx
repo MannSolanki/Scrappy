@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import PickupPartnerDashboard from './pages/PickupPartnerDashboard';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import AgentDashboard from './pages/AgentDashboard';
 import Home from './pages/Home';
 import './styles/ScrappyUI.css';
 
@@ -19,6 +20,7 @@ const getDefaultLoggedInRoute = () => {
   const role = getUserRole();
   if (role === 'admin') return '/admin-dashboard';
   if (role === 'pickup_partner') return '/pickup-partner-dashboard';
+  if (role === 'pickup_agent') return '/agent-dashboard';
   return '/home';
 };
 
@@ -113,6 +115,14 @@ function AppLayout() {
             element={
               <ProtectedRoute allowedRoles={['pickup_partner']} redirectTo="/home">
                 <PickupPartnerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agent-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['pickup_agent']} redirectTo="/home">
+                <AgentDashboard />
               </ProtectedRoute>
             }
           />

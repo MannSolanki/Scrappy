@@ -9,7 +9,7 @@ const scrapRequestSchema = new mongoose.Schema(
     },
     scrapType: {
       type: String,
-      enum: ["plastic", "metal", "paper", "e-waste"],
+      enum: ["plastic", "metal", "paper", "ewaste", "glass", "others"],
       required: true,
     },
     estimatedWeightKg: {
@@ -40,12 +40,32 @@ const scrapRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "approved", "on_the_way", "rejected", "completed"],
+      enum: ["pending", "approved", "accepted", "on_the_way", "reached", "rejected", "completed"],
       default: "pending",
     },
     assignedPickupPartner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      default: null,
+    },
+    collectedWeightKg: {
+      type: Number,
+      default: null,
+    },
+    collectedAmount: {
+      type: Number,
+      default: null,
+    },
+    completedAt: {
+      type: Date,
+      default: null,
+    },
+    pickupLocation: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
+    scrapImageUrl: {
+      type: String,
       default: null,
     },
   },

@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth');
 const scrapRoutes = require('./routes/scraps');
 const userRoutes = require('./routes/users');
 const uploadRoutes = require('./routes/upload');
+const pricingRoutes = require('./routes/pricing');
 
 // Connect to database
 connectDB();
@@ -70,6 +71,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/scraps', scrapRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/pricing', pricingRoutes);
 
 // 404 handler
 app.use((req, res) => {

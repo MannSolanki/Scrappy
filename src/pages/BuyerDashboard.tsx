@@ -42,7 +42,7 @@ const BuyerDashboard = () => {
             if (minPrice) params.append('minPrice', minPrice);
             if (maxPrice) params.append('maxPrice', maxPrice);
 
-            const { data } = await API.get(`/api/scraps?${params}`);
+            const { data } = await API.get(`/scraps?${params}`);
             setListings(data.data);
             setTotalPages(data.totalPages);
             setTotal(data.total);

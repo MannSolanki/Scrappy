@@ -12,6 +12,8 @@ type StoredUser = {
   token?: string;
 };
 
+type NavVariant = "default" | "primary" | "profile";
+
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<StoredUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -20,8 +22,10 @@ const Navbar: React.FC = () => {
   const normalizedRole = String(user?.role || "").trim().toLowerCase();
   const isAdmin = normalizedRole === "admin";
   const isPickupPartner = normalizedRole === "pickup_partner";
-  const isPublicNav = !isAdmin && !isPickupPartner;
-  const homeRoute = isAdmin ? "/admin-dashboard" : isPickupPartner ? "/pickup-partner-dashboard" : "/home";
+  const isPickupAgent = normalizedRole === "pickup_agent";
+  const isPublicNav = !isAdmin && !isPickupPartner && !isPickupAgent;
+  const isSignedInCustomer = Boolean(user) && isPublicNav;
+  const homeRoute = isAdmin ? "/admin-dashboard" : isPickupPartner ? "/pickup-partner-dashboard" : isPickupAgent ? "/agent-dashboard" : "/home";
 
   const getUserDisplayName = () => {
     if (!user?.name) return "Profile";
@@ -60,8 +64,52 @@ const Navbar: React.FC = () => {
     setMenuOpen(false);
   }, [location.pathname, location.hash]);
 
-  const navItemClass = (active: boolean) =>
-    `nav-link${active ? " nav-link-active" : ""}`;
+  const navItemClass = (active: boolean, variant: NavVariant = "default") =>
+    `nav-link${active ? " nav-link-active" : ""}${variant === "primary" ? " nav-link-primary" : ""}${variant === "profile" ? " nav-link-profile" : ""}`;
+
+  const matchesRoute = (pathname: string, hash = "") => location.pathname === pathname && location.hash === hash;
+
+  const customerNavItems = [
+    {
+      label: "Home",
+      to: "/home",
+      active: location.pathname === "/home" && location.hash !== "#scrap-price-cards",
+      variant: "default" as NavVariant,
+    },
+    {
+      label: "Book Pickup",
+      to: isSignedInCustomer ? "/dashboard#book-pickup" : "/login",
+      active:
+        location.pathname === "/dashboard" &&
+        location.hash !== "#track-request" &&
+        location.hash !== "#profile-overview",
+      variant: "primary" as NavVariant,
+    },
+    {
+      label: "Track Request",
+      to: isSignedInCustomer ? "/dashboard#track-request" : "/login",
+      active: matchesRoute("/dashboard", "#track-request"),
+      variant: "default" as NavVariant,
+    },
+    {
+      label: "Scrap History",
+      to: isSignedInCustomer ? "/history" : "/login",
+      active: location.pathname === "/history",
+      variant: "default" as NavVariant,
+    },
+    {
+      label: "Pricing",
+      to: "/home#scrap-price-cards",
+      active: matchesRoute("/home", "#scrap-price-cards"),
+      variant: "default" as NavVariant,
+    },
+    {
+      label: "Contact",
+      to: "/contact",
+      active: location.pathname === "/contact",
+      variant: "default" as NavVariant,
+    },
+  ];
 
   return (
     <motion.nav
@@ -105,18 +153,32 @@ const Navbar: React.FC = () => {
               <div className="nav-links-list">
                 {isPublicNav && (
                   <>
-                    <Link to="/home" className={navItemClass(location.pathname === "/home" && location.hash !== "#services")}>
-                      Home
-                    </Link>
-                    <Link to="/home#services" className={navItemClass(location.pathname === "/home" && location.hash === "#services")}>
-                      Services
-                    </Link>
-                    <Link to="/contact" className={navItemClass(location.pathname === "/contact")}>
-                      Contact
-                    </Link>
-                    {!user && (
-                      <Link to="/login" className={navItemClass(location.pathname === "/login" || location.pathname === "/signup")}>
-                        Login/Signup
+                    {customerNavItems.map((item) => (
+                      <Link
+                        key={item.label}
+                        to={item.to}
+                        className={navItemClass(item.active, item.variant)}
+                        aria-current={item.active ? "page" : undefined}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+
+                    {user ? (
+                      <Link
+                        to="/dashboard#profile-overview"
+                        className={navItemClass(matchesRoute("/dashboard", "#profile-overview"), "profile")}
+                        aria-current={matchesRoute("/dashboard", "#profile-overview") ? "page" : undefined}
+                      >
+                        {getUserDisplayName()}
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/login"
+                        className={navItemClass(location.pathname === "/login" || location.pathname === "/signup", "profile")}
+                        aria-current={location.pathname === "/login" || location.pathname === "/signup" ? "page" : undefined}
+                      >
+                        Login / Signup
                       </Link>
                     )}
                   </>
@@ -143,15 +205,18 @@ const Navbar: React.FC = () => {
                     </Link>
                   </>
                 )}
-              </div>
 
-              {user && (
-                <div className="user-profile-btn-wrapper">
-                  <Link to={homeRoute} className="user-profile-btn">
-                    {getUserDisplayName()}
-                  </Link>
-                </div>
-              )}
+                {isPickupAgent && (
+                  <>
+                    <Link to="/agent-dashboard" className={navItemClass(location.pathname === "/agent-dashboard")}>
+                      Agent Dashboard
+                    </Link>
+                    <Link to="/contact" className={navItemClass(location.pathname === "/contact")}>
+                      Contact
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>

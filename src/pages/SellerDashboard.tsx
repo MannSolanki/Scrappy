@@ -49,7 +49,7 @@ const SellerDashboard = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const { data } = await API.get('/api/scraps/my/listings');
+            const { data } = await API.get('/scraps/my/listings');
             setListings(data.data);
             setStats(data.stats);
         } catch { toast.error('Failed to load listings'); }
@@ -61,7 +61,7 @@ const SellerDashboard = () => {
     const fetchPriceSuggestion = async (category: string, weight: string) => {
         if (!category || !weight || Number(weight) <= 0) return;
         try {
-            const { data } = await API.get(`/api/scraps/price-suggest?category=${category}&weight=${weight}`);
+            const { data } = await API.get(`/scraps/price-suggest?category=${category}&weight=${weight}`);
             if (data.success) setPriceSuggestion(data.data);
         } catch { }
     };
@@ -119,10 +119,10 @@ const SellerDashboard = () => {
             images.forEach(img => formData.append('images', img));
 
             if (editItem) {
-                await API.put(`/api/scraps/${editItem._id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                await API.put(`/scraps/${editItem._id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
                 toast.success('Listing updated!');
             } else {
-                await API.post('/api/scraps', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                await API.post('/scraps', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
                 toast.success('Listing added! 🎉');
             }
             setShowModal(false);
@@ -135,7 +135,7 @@ const SellerDashboard = () => {
     const handleDelete = async (id: string) => {
         if (!confirm('Delete this listing?')) return;
         try {
-            await API.delete(`/api/scraps/${id}`);
+            await API.delete(`/scraps/${id}`);
             toast.success('Listing deleted');
             setListings(prev => prev.filter(l => l._id !== id));
         } catch { toast.error('Failed to delete'); }
@@ -144,7 +144,7 @@ const SellerDashboard = () => {
     const handleStatusToggle = async (item: ScrapItem) => {
         const newStatus = item.status === 'available' ? 'sold' : 'available';
         try {
-            await API.put(`/api/scraps/${item._id}`, { status: newStatus });
+            await API.put(`/scraps/${item._id}`, { status: newStatus });
             setListings(prev => prev.map(l => l._id === item._id ? { ...l, status: newStatus } : l));
             toast.success(`Marked as ${newStatus}`);
         } catch { toast.error('Failed to update status'); }

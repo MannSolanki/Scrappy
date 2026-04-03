@@ -1,40 +1,49 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config/apiBaseUrl";
-import "../styles/Auth.css";
+import { FaEnvelope, FaLock, FaLeaf, FaSpinner } from "react-icons/fa";
+import { Link } from "react-router-dom";
+
+// ✅ IMPORTANT: Your backend base URL
+const API_BASE_URL = "http://localhost:5000/api";
 
 const Signup: React.FC = () => {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<"user" | "pickup_partner">("user");
-  const [message, setMessage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user");
 
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
     setIsLoading(true);
+    setMessage("");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({
+          email,
+          password,
+          role,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.message || "Signup failed");
-        return;
+        throw new Error(data.message || "Signup failed");
       }
 
-      navigate("/login");
-    } catch {
-      setMessage("Unable to reach server. Please try again.");
+      setMessage("✅ Signup successful!");
+      setEmail("");
+      setPassword("");
+      setRole("user");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      setMessage("❌ Unable to reach server. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -43,35 +52,52 @@ const Signup: React.FC = () => {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h2>Signup</h2>
+        <div className="auth-heading">
+          <FaLeaf className="auth-heading-icon" />
+          <h2>Signup</h2>
+          <p className="auth-subtitle">Create a new eco-friendly account</p>
+        </div>
 
         <form onSubmit={handleSignup} className="auth-form">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="auth-input-group">
+            <span className="auth-input-icon"><FaEnvelope /></span>
+            <input
+              type="email"
+              placeholder="Email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <span className="auth-input-line" />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="auth-input-group">
+            <span className="auth-input-icon"><FaLock /></span>
+            <input
+              type="password"
+              placeholder="Password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span className="auth-input-line" />
+          </div>
 
-          <select value={role} onChange={(e) => setRole(e.target.value as "user" | "pickup_partner")}>
-            <option value="user">Signup as User</option>
-            <option value="pickup_partner">Signup as Pickup Partner</option>
-          </select>
+          <div className="auth-role-select">
+            <button type="button" className={`auth-tab ${role === "user" ? "active" : ""}`} onClick={() => setRole("user")}>User</button>
+            <button type="button" className={`auth-tab ${role === "pickup_partner" ? "active" : ""}`} onClick={() => setRole("pickup_partner")}>Pickup Partner</button>
+          </div>
 
-          {message && <p className="auth-message error">{message}</p>}
+          {message && (
+            <p className="auth-message">{message}</p>
+          )}
 
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? "Creating account..." : "Signup"}
+          <button type="submit" className="auth-submit-button" disabled={isLoading}>
+            {isLoading ? <span className="spinner"><FaSpinner /></span> : "Signup"}
           </button>
+
+          <div className="auth-divider"><span>OR</span></div>
+          <p className="auth-social-hint">Already registered? <Link to="/login">Login here</Link></p>
         </form>
 
         <p className="auth-switch">

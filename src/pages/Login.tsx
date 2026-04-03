@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaLeaf, FaSpinner } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/Auth.css";
@@ -22,12 +22,13 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      // ✅ FIXED LINE HERE
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role: loginMode }),
       });
 
       const data = await res.json();
@@ -38,7 +39,11 @@ const Login: React.FC = () => {
       }
 
       const backendRole = String(data.user?.role || "").trim().toLowerCase();
-      if (backendRole !== "admin" && backendRole !== "user" && backendRole !== "pickup_partner") {
+      if (
+        backendRole !== "admin" &&
+        backendRole !== "user" &&
+        backendRole !== "pickup_partner"
+      ) {
         setMessage("Login response missing valid user role.");
         return;
       }
@@ -59,25 +64,35 @@ const Login: React.FC = () => {
         rewardPoints: Number(data.user?.rewardPoints || 0),
       };
 
-      // Clear previous auth keys before writing fresh login state.
+      // Clear old data
       localStorage.removeItem("token");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("user");
       localStorage.removeItem("userEmail");
+      localStorage.removeItem("scrappy_token");
+      localStorage.removeItem("scrappy_user");
 
-      // Store both token separately and within user object
+      // Store new data
       localStorage.setItem("token", tokenToStore);
+      localStorage.setItem("scrappy_token", tokenToStore);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("user", JSON.stringify(normalizedUser));
+      localStorage.setItem("scrappy_user", JSON.stringify(normalizedUser));
       localStorage.setItem("userEmail", normalizedUser.email);
 
       window.dispatchEvent(new Event("auth-changed"));
 
       const normalizedEmail = normalizedUser.email.trim().toLowerCase();
       const emailIndicatesAdmin = normalizedEmail.includes("admin");
-      const shouldGoToPickupPartner = loginMode === "pickup_partner" || normalizedUser.role === "pickup_partner";
+
+      const shouldGoToPickupPartner =
+        loginMode === "pickup_partner" ||
+        normalizedUser.role === "pickup_partner";
+
       const shouldGoToAdmin =
-        loginMode === "admin" || normalizedUser.role === "admin" || emailIndicatesAdmin;
+        loginMode === "admin" ||
+        normalizedUser.role === "admin" ||
+        emailIndicatesAdmin;
 
       if (shouldGoToPickupPartner) {
         navigate("/pickup-partner-dashboard");
@@ -95,40 +110,29 @@ const Login: React.FC = () => {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <p className="auth-subtitle">Welcome back to your eco dashboard</p>
-        <h2>
-          {loginMode === "admin"
-            ? "Login as Admin"
-            : loginMode === "pickup_partner"
+        <div className="auth-heading">
+          <FaLeaf className="auth-heading-icon" />
+          <p className="auth-subtitle">Welcome back to your eco dashboard</p>
+          <h2>
+            {loginMode === "admin"
+              ? "Login as Admin"
+              : loginMode === "pickup_partner"
               ? "Login as Pickup Partner"
               : "Login"}
-        </h2>
+          </h2>
+        </div>
 
-        <div className="auth-tabs" role="tablist" aria-label="Login type">
-          <button
-            type="button"
-            onClick={() => setLoginMode("user")}
-            disabled={isLoading || loginMode === "user"}
-            className={`auth-tab ${loginMode === "user" ? "active" : ""}`}
-            aria-pressed={loginMode === "user"}
-          >
+        <div className="auth-tabs">
+          <button className={`auth-tab ${loginMode === "user" ? "active" : ""}`} onClick={() => setLoginMode("user")} disabled={isLoading}>
             User
           </button>
-          <button
-            type="button"
-            onClick={() => setLoginMode("admin")}
-            disabled={isLoading || loginMode === "admin"}
-            className={`auth-tab ${loginMode === "admin" ? "active" : ""}`}
-            aria-pressed={loginMode === "admin"}
-          >
+          <button className={`auth-tab ${loginMode === "admin" ? "active" : ""}`} onClick={() => setLoginMode("admin")} disabled={isLoading}>
             Admin
           </button>
           <button
-            type="button"
-            onClick={() => setLoginMode("pickup_partner")}
-            disabled={isLoading || loginMode === "pickup_partner"}
             className={`auth-tab ${loginMode === "pickup_partner" ? "active" : ""}`}
-            aria-pressed={loginMode === "pickup_partner"}
+            onClick={() => setLoginMode("pickup_partner")}
+            disabled={isLoading}
           >
             Pickup Partner
           </button>
@@ -136,7 +140,7 @@ const Login: React.FC = () => {
 
         <form onSubmit={handleLogin} className="auth-form">
           <div className="auth-input-group">
-            <span className="auth-input-icon" aria-hidden="true">@</span>
+            <span className="auth-input-icon"><FaEnvelope /></span>
             <input
               type="email"
               placeholder="Email"
@@ -144,46 +148,53 @@ const Login: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <span className="auth-input-line" aria-hidden="true" />
+            <span className="auth-input-line" />
           </div>
 
-          <div className="auth-input-group">
-            <div className="password-field-shell">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="password-visual-toggle"
-                onClick={() => setShowPassword((prev) => !prev)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-              </button>
-            </div>
-            <span className="auth-input-line" aria-hidden="true" />
+          <div className="auth-input-group relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className="password-input w-full bg-white pl-10 pr-10 py-3 border border-gray-300 rounded-lg outline-none transition-all duration-200 focus:ring-2 focus:ring-green-400"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <span className="auth-input-icon password-lock-icon absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+              <FaLock className="h-4 w-4" />
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="password-visual-toggle absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors duration-200 hover:text-gray-700"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FaEyeSlash className="password-eye-icon h-4 w-4" /> : <FaEye className="password-eye-icon h-4 w-4" />}
+            </button>
           </div>
 
-          {message && <p className="auth-message error">{message}</p>}
+          <div className="auth-row">
+            <Link to="/forgot-password" className="auth-forgot">Forgot Password?</Link>
+          </div>
 
-          <button type="submit" disabled={isLoading} className="auth-submit-btn">
-            {isLoading
-              ? "Logging in..."
-              : loginMode === "admin"
-                ? "Login as Admin"
-                : loginMode === "pickup_partner"
-                  ? "Login as Pickup Partner"
-                  : "Login"}
+          {message && <p className="auth-message">{message}</p>}
+
+          <button type="submit" className="auth-submit-button" disabled={isLoading}>
+            {isLoading ? (
+              <span className="spinner"><FaSpinner /></span>
+            ) : (
+              "Login"
+            )}
           </button>
-        </form>
 
-        <p className="auth-switch">
-          No account? <Link to="/signup">Create account</Link>
-        </p>
+          <div className="auth-divider"><span>OR</span></div>
+
+          <p className="auth-social-hint">Continue with social account or sign up below</p>
+
+          <p className="auth-switch">
+            No account? <Link to="/signup">Create account</Link>
+          </p>
+        </form>
       </div>
     </div>
   );

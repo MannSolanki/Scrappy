@@ -39,7 +39,7 @@ const toErrorMessage = async (response: Response): Promise<string> => {
 };
 
 export const fetchUsers = async (): Promise<AdminUser[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+  const response = await fetch(`${API_BASE_URL}/admin/users`, {
     method: 'GET',
     headers: buildHeaders(),
   });
@@ -53,7 +53,7 @@ export const fetchUsers = async (): Promise<AdminUser[]> => {
 };
 
 export const fetchScrapRequests = async (): Promise<ScrapRequest[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/scrap-requests`, {
+  const response = await fetch(`${API_BASE_URL}/admin/scrap-requests`, {
     method: 'GET',
     headers: buildHeaders(),
   });
@@ -70,7 +70,7 @@ export const updateScrapRequestStatus = async (
   requestId: string,
   status: 'approved' | 'rejected'
 ): Promise<ScrapRequest> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/scrap-requests/${requestId}`, {
+  const response = await fetch(`${API_BASE_URL}/admin/scrap-requests/${requestId}`, {
     method: 'PUT',
     headers: buildHeaders(),
     body: JSON.stringify({ status }),

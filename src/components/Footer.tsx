@@ -45,6 +45,7 @@ const Footer: React.FC = () => {
           <div>
             <h3>Quick Links</h3>
             <div className="footer-links">
+              <Link to="/">Home</Link>
               <Link to="/about">About Us</Link>
               <Link to="/contact">Contact</Link>
               {isLoggedIn ? (

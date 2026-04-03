@@ -1,9 +1,9 @@
 import React, { startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config/apiBaseUrl";
 import { AnimatePresence, motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
-import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { DirectionsRenderer, GoogleMap, Marker } from "@react-google-maps/api";
+import { apiFetch } from "../api/apiClient";
 import {
   ArrowUpRight,
   Calendar,
@@ -161,6 +161,7 @@ const RippleButton = ({ children, className = "", disabled, onClick, type = "but
 
 const PickupPartnerDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const googleMapsApiKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "").trim();
   const [user, setUser] = useState<StoredUser | null>(null);
   const [requests, setRequests] = useState<PickupRequest[]>([]);
   const [pricingRules, setPricingRules] = useState<PricingRule[]>([]);
@@ -176,15 +177,62 @@ const PickupPartnerDashboard: React.FC = () => {
   const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [destinationLocation, setDestinationLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [isRouteLoading, setIsRouteLoading] = useState(false);
+  const [isMapLoaded, setIsMapLoaded] = useState(Boolean(window.google?.maps));
+  const [mapLoadError, setMapLoadError] = useState("");
   const [completionRequest, setCompletionRequest] = useState<PickupRequest | null>(null);
   const [actualWeight, setActualWeight] = useState("");
   const deferredSearch = useDeferredValue(searchQuery);
-  const { isLoaded: isMapLoaded } = useJsApiLoader({ id: "pickup-partner-map", googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "" });
 
-  const authHeaders = useMemo(() => {
-    const token = user?.token || localStorage.getItem("token") || "";
-    return { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
-  }, [user]);
+  useEffect(() => {
+    if (!googleMapsApiKey) {
+      setIsMapLoaded(false);
+      setMapLoadError("Missing Google Maps API key. Add VITE_GOOGLE_MAPS_API_KEY to your local env file.");
+      return;
+    }
+
+    if (window.google?.maps) {
+      setIsMapLoaded(true);
+      setMapLoadError("");
+      return;
+    }
+
+    const scriptId = "google-maps-script";
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    const handleLoad = () => {
+      setIsMapLoaded(true);
+      setMapLoadError("");
+    };
+
+    const handleError = () => {
+      setIsMapLoaded(false);
+      setMapLoadError("Unable to load Google Maps. Verify your API key and billing setup.");
+    };
+
+    if (existingScript) {
+      existingScript.addEventListener("load", handleLoad);
+      existingScript.addEventListener("error", handleError);
+
+      return () => {
+        existingScript.removeEventListener("load", handleLoad);
+        existingScript.removeEventListener("error", handleError);
+      };
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(googleMapsApiKey)}`;
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", handleLoad);
+    script.addEventListener("error", handleError);
+    document.head.appendChild(script);
+
+    return () => {
+      script.removeEventListener("load", handleLoad);
+      script.removeEventListener("error", handleError);
+    };
+  }, [googleMapsApiKey]);
 
   useEffect(() => {
     const rawUser = localStorage.getItem("user");
@@ -208,16 +256,16 @@ const PickupPartnerDashboard: React.FC = () => {
       );
     });
 
-  const loadRequests = async (headers: Record<string, string>) => {
-    const response = await fetch(`${API_BASE_URL}/api/pickup-partner/requests`, { method: "GET", headers });
+  const loadRequests = async () => {
+    const response = await apiFetch("/pickup/requests", { method: "GET" });
     const data = await response.json();
     if (!response.ok) throw new Error(getBackendMessage(data, "Unable to load pickup requests."));
     startTransition(() => setRequests(data.requests || []));
   };
 
-  const loadPricingRules = async (headers: Record<string, string>) => {
+  const loadPricingRules = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/pricing`, { method: "GET", headers });
+      const response = await apiFetch("/pricing", { method: "GET" });
       const data = await response.json();
       if (response.ok && data.success) setPricingRules(data.data?.rules || []);
     } catch {
@@ -226,11 +274,14 @@ const PickupPartnerDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!user?.token && !localStorage.getItem("token")) return;
+    if (!user?.token && !localStorage.getItem("token")) {
+      navigate("/login", { replace: true });
+      return;
+    }
     const bootstrap = async () => {
       setIsLoading(true);
       try {
-        await Promise.all([loadRequests(authHeaders), loadPricingRules(authHeaders)]);
+        await Promise.all([loadRequests(), loadPricingRules()]);
       } catch (error: any) {
         toast.error(error.message || "Could not load dashboard.");
       } finally {
@@ -238,7 +289,7 @@ const PickupPartnerDashboard: React.FC = () => {
       }
     };
     void bootstrap();
-  }, [user, authHeaders]);
+  }, [navigate, user]);
 
   useEffect(() => {
     let cancelled = false;
@@ -351,9 +402,13 @@ const PickupPartnerDashboard: React.FC = () => {
     if (nextStatus === "completed" && !payload.pickupLocation) payload.pickupLocation = await getLocation();
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/pickup-partner/requests/${request._id}/status`, {
+      const endpoint =
+        nextStatus === "accepted"
+          ? `/pickup/accept/${request._id}`
+          : `/pickup/requests/${request._id}/status`;
+
+      const response = await apiFetch(endpoint, {
         method: "PATCH",
-        headers: authHeaders,
         body: JSON.stringify(payload),
       });
       const data = await response.json();
@@ -825,7 +880,17 @@ const PickupPartnerDashboard: React.FC = () => {
 
             <div className="relative h-full w-full overflow-hidden">
               <div className="absolute inset-0">
-                {isMapLoaded ? (
+                {!googleMapsApiKey ? (
+                  <div className="flex h-full items-center justify-center bg-slate-900 text-white">
+                    <div className="max-w-md px-6 text-center">
+                      <Navigation className="mx-auto" size={28} />
+                      <p className="mt-4 text-lg font-semibold">Google Maps API key required</p>
+                      <p className="mt-2 text-sm text-white/80">
+                        Please add <code>VITE_GOOGLE_MAPS_API_KEY</code> to your local env file, then restart Vite.
+                      </p>
+                    </div>
+                  </div>
+                ) : isMapLoaded ? (
                   <GoogleMap
                     mapContainerStyle={mapContainerStyle}
                     center={userLocation || destinationLocation || defaultMapCenter}
@@ -853,9 +918,9 @@ const PickupPartnerDashboard: React.FC = () => {
                   </GoogleMap>
                 ) : (
                   <div className="flex h-full items-center justify-center bg-slate-900 text-white">
-                    <div className="text-center">
-                      <Loader2 className="mx-auto animate-spin" size={28} />
-                      <p className="mt-3 text-sm text-white/80">Loading map...</p>
+                    <div className="max-w-md px-6 text-center">
+                      {mapLoadError ? <Navigation className="mx-auto" size={28} /> : <Loader2 className="mx-auto animate-spin" size={28} />}
+                      <p className="mt-3 text-sm text-white/80">{mapLoadError || "Loading map..."}</p>
                     </div>
                   </div>
                 )}

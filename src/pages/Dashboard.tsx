@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../config/apiBaseUrl";
 import "../styles/Dashboard.css";
 import { CalendarClock, MapPin, Recycle, Truck, Calculator, CheckCircle2, Weight, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
+import { formatRequestStatusLabel, formatScrapTypeLabel, getRequestWeight, type ScrapRequest } from "../utils/scrapRequests";
 
 type StoredUser = {
   id: string;
@@ -24,19 +25,6 @@ type MarketReason = {
   category: string;
   status: 'High' | 'Low' | 'Stable';
   reasonText: string;
-};
-
-type ScrapRequest = {
-  _id: string;
-  scrapType: string;
-  estimatedWeightKg: number;
-  address: string;
-  preferredPickupDateTime: string;
-  ratePerKg: number;
-  estimatedPrice: number;
-  rewardPoints: number;
-  status: "pending" | "approved" | "accepted" | "on_the_way" | "reached" | "rejected" | "completed";
-  createdAt: string;
 };
 
 const CATEGORIES = [
@@ -136,7 +124,7 @@ const Dashboard: React.FC = () => {
 
   const loadPricingData = async (headers: Record<string, string>) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/pricing`, {
+      const res = await fetch(`${API_BASE_URL}/pricing`, {
         method: "GET",
         headers,
       });
@@ -153,7 +141,7 @@ const Dashboard: React.FC = () => {
   const loadRequests = async (headers: Record<string, string>) => {
     setIsLoadingHistory(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/scrap-requests/my-requests`, {
+      const res = await fetch(`${API_BASE_URL}/scrap-requests/my-requests`, {
         method: "GET",
         headers,
       });
@@ -222,7 +210,7 @@ const Dashboard: React.FC = () => {
     setFeedback("");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/scrap-requests`, {
+      const res = await fetch(`${API_BASE_URL}/scrap-requests`, {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify({
@@ -288,15 +276,17 @@ const Dashboard: React.FC = () => {
       )}
       <div className="dashboard-grid">
         <motion.section
-          className="dashboard-card booking-card"
+          className="dashboard-card booking-card dashboard-anchor-card"
           initial={{ opacity: 0, y: 44 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.12, ease: "easeOut" }}
         >
-          <h1>Smart Scrap Pickup Booking</h1>
-          <p className="dashboard-email">Signed in as {user?.email || "Unknown user"}</p>
+          <div id="profile-overview" className="dashboard-section-head">
+            <h1>Smart Scrap Pickup Booking</h1>
+            <p className="dashboard-email">Signed in as {user?.email || "Unknown user"}</p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="pickup-form">
+          <form id="book-pickup" onSubmit={handleSubmit} className="pickup-form">
             <label>
               <span className="label-row">
                 <Recycle size={16} aria-hidden="true" />
@@ -498,12 +488,14 @@ const Dashboard: React.FC = () => {
         </motion.section>
 
         <motion.section
-          className="dashboard-card history-card"
+          id="track-request"
+          className="dashboard-card history-card dashboard-anchor-card"
           initial={{ opacity: 0, y: 44 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.22, ease: "easeOut" }}
         >
-          <h2>Your Pickup Requests</h2>
+          <h2>Track Your Requests</h2>
+          <p className="dashboard-section-copy">Follow pending pickups, review payout estimates, and check the latest status of each scheduled collection.</p>
           <motion.div
             className="reward-total stats-card"
             initial={{ opacity: 0, y: 20 }}
@@ -540,12 +532,12 @@ const Dashboard: React.FC = () => {
                   transition={{ duration: 0.5, delay: 0.28 + index * 0.06, ease: "easeOut" }}
                 >
                   <div className="request-top">
-                    <h3>{request.scrapType.toUpperCase()}</h3>
+                    <h3>{formatScrapTypeLabel(request.scrapType)}</h3>
                     <span className={`status-chip status-${request.status.toLowerCase()}`}>
-                      {request.status}
+                      {formatRequestStatusLabel(request.status)}
                     </span>
                   </div>
-                  <p>Weight: {request.estimatedWeightKg} kg</p>
+                  <p>Weight: {getRequestWeight(request).toFixed(1)} kg</p>
                   <p>Price: ₹{Number(request.estimatedPrice).toFixed(2)}</p>
                   <p>Points: {request.rewardPoints}</p>
                   <p>Address: {request.address}</p>
@@ -559,5 +551,5 @@ const Dashboard: React.FC = () => {
     </motion.div>
   );
 };
-
 export default Dashboard;
+

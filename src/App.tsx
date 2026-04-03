@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import PickupPartnerDashboard from './pages/PickupPartnerDashboard';
+import ScrapHistory from './pages/ScrapHistory';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import AgentDashboard from './pages/AgentDashboard';
@@ -87,6 +88,24 @@ function AppLayout() {
     return () => clearTimeout(timer);
   }, [location]);
 
+  useEffect(() => {
+    if (!location.hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      return;
+    }
+
+    const targetId = decodeURIComponent(location.hash.slice(1));
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timer = window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+      });
+    }, 80);
+
+    return () => window.clearTimeout(timer);
+  }, [location.hash, location.pathname]);
+
   return (
     <div className="site-shell">
       {loading && <PageLoader />}
@@ -107,6 +126,14 @@ function AppLayout() {
             element={
               <ProtectedRoute allowedRoles={['user']} redirectTo={getDefaultLoggedInRoute()}>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute allowedRoles={['user']} redirectTo={getDefaultLoggedInRoute()}>
+                <ScrapHistory />
               </ProtectedRoute>
             }
           />

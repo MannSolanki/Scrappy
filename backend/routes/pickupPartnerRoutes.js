@@ -23,11 +23,7 @@ const resolvePricePerKg = async (scrapType, weightKg, fallbackRatePerKg) => {
     const rawMaxWeight = Number(rule.maxWeight);
     const maxWeight = Number.isFinite(rawMaxWeight) ? rawMaxWeight : Number.POSITIVE_INFINITY;
 
-    return (
-      normalizedCategory === normalizedScrapType &&
-      safeWeight >= minWeight &&
-      safeWeight < maxWeight
-    );
+    return normalizedCategory === normalizedScrapType && safeWeight >= minWeight && safeWeight < maxWeight;
   });
 
   if (matchedRule?.pricePerKg) {
@@ -49,27 +45,10 @@ const requirePickupPartner = (req, res, next) => {
   return next();
 };
 
-router.get("/requests", authMiddleware, requirePickupPartner, async (req, res) => {
-  try {
-    const requests = await ScrapRequest.find({
-      $or: [
-        { assignedPickupPartner: req.user._id },
-        { status: "approved", assignedPickupPartner: null },
-      ],
-    })
-      .populate("user", "name email")
-      .sort({ preferredPickupDateTime: 1, createdAt: -1 });
-
-    return res.json({ requests });
-  } catch (error) {
-    return res.status(500).json({ message: "Unable to fetch pickup requests" });
-  }
-});
-
-router.patch("/requests/:id/status", authMiddleware, requirePickupPartner, async (req, res) => {
+const updatePickupStatus = async (req, res, forcedStatus) => {
   try {
     const { status, scrapType, pickupLocation, scrapImageUrl, collectedWeightKg } = req.body;
-    const normalizedStatus = String(status || "").trim().toLowerCase();
+    const normalizedStatus = String(forcedStatus || status || "").trim().toLowerCase();
     const pickupId = String(req.params.id || "").trim();
     const allowedTransitions = {
       accepted: ["approved", "pending"],
@@ -78,7 +57,7 @@ router.patch("/requests/:id/status", authMiddleware, requirePickupPartner, async
       completed: ["reached", "on_the_way"],
     };
 
-    if (!Object.keys(allowedTransitions).includes(normalizedStatus)) {
+    if (!Object.prototype.hasOwnProperty.call(allowedTransitions, normalizedStatus)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
@@ -123,15 +102,17 @@ router.patch("/requests/:id/status", authMiddleware, requirePickupPartner, async
       request.collectedAmount = totalAmount;
       request.completedAt = new Date();
       request.ratePerKg = pricePerKg;
-      
+
       if (pickupLocation && typeof pickupLocation.lat === "number" && typeof pickupLocation.lng === "number") {
         request.pickupLocation = pickupLocation;
       }
+
       if (scrapImageUrl) {
         request.scrapImageUrl = scrapImageUrl;
       }
     } else {
       request.status = normalizedStatus;
+
       if (
         pickupLocation &&
         typeof pickupLocation.lat === "number" &&
@@ -164,6 +145,31 @@ router.patch("/requests/:id/status", authMiddleware, requirePickupPartner, async
       message: error instanceof Error ? error.message : "Unable to update pickup request status",
     });
   }
+};
+
+router.get("/requests", authMiddleware, requirePickupPartner, async (req, res) => {
+  try {
+    const requests = await ScrapRequest.find({
+      $or: [
+        { assignedPickupPartner: req.user._id },
+        { status: "approved", assignedPickupPartner: null },
+      ],
+    })
+      .populate("user", "name email")
+      .sort({ preferredPickupDateTime: 1, createdAt: -1 });
+
+    return res.json({ requests });
+  } catch (error) {
+    return res.status(500).json({ message: "Unable to fetch pickup requests" });
+  }
 });
+
+router.patch("/requests/:id/status", authMiddleware, requirePickupPartner, async (req, res) =>
+  updatePickupStatus(req, res)
+);
+
+router.patch("/accept/:id", authMiddleware, requirePickupPartner, async (req, res) =>
+  updatePickupStatus(req, res, "accepted")
+);
 
 module.exports = router;

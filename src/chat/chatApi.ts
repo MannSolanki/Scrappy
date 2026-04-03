@@ -33,8 +33,8 @@ const toMessage = async (response: Response): Promise<string> => {
 
 export const fetchChatMessages = async (userId?: string): Promise<{ messages: ChatMessage[]; typing: boolean }> => {
   const url = userId
-    ? `${API_BASE_URL}/api/chat/messages?userId=${encodeURIComponent(userId)}`
-    : `${API_BASE_URL}/api/chat/messages`;
+    ? `${API_BASE_URL}/chat/messages?userId=${encodeURIComponent(userId)}`
+    : `${API_BASE_URL}/chat/messages`;
 
   const response = await fetch(url, {
     method: "GET",
@@ -53,7 +53,7 @@ export const fetchChatMessages = async (userId?: string): Promise<{ messages: Ch
 };
 
 export const sendChatMessage = async (message: string, userId?: string): Promise<ChatMessage> => {
-  const response = await fetch(`${API_BASE_URL}/api/chat/messages`, {
+  const response = await fetch(`${API_BASE_URL}/chat/messages`, {
     method: "POST",
     headers: buildHeaders(),
     body: JSON.stringify({ message, userId }),
@@ -72,7 +72,7 @@ export const sendChatMessage = async (message: string, userId?: string): Promise
 };
 
 export const setTyping = async (isTyping: boolean, userId?: string): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/chat/typing`, {
+  const response = await fetch(`${API_BASE_URL}/chat/typing`, {
     method: "POST",
     headers: buildHeaders(),
     body: JSON.stringify({ isTyping, userId }),
@@ -84,7 +84,7 @@ export const setTyping = async (isTyping: boolean, userId?: string): Promise<voi
 };
 
 export const fetchAdminConversations = async (): Promise<ChatConversation[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/chat/admin/conversations`, {
+  const response = await fetch(`${API_BASE_URL}/chat/admin/conversations`, {
     method: "GET",
     headers: buildHeaders(),
   });
@@ -98,7 +98,7 @@ export const fetchAdminConversations = async (): Promise<ChatConversation[]> => 
 };
 
 export const deleteChatMessage = async (messageId: string): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}`, {
+  const response = await fetch(`${API_BASE_URL}/chat/messages/${messageId}`, {
     method: "DELETE",
     headers: buildHeaders(),
   });

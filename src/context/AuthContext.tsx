@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const login = async (email: string, password: string) => {
-        const { data } = await API.post('/api/auth/login', { email, password });
+        const { data } = await API.post('/auth/login', { email, password });
         setToken(data.token);
         setUser(data.user);
         localStorage.setItem('scrappy_token', data.token);
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const register = async (name: string, email: string, password: string, role: string) => {
-        const { data } = await API.post('/api/auth/register', { name, email, password, role });
+        const { data } = await API.post('/auth/register', { name, email, password, role });
         setToken(data.token);
         setUser(data.user);
         localStorage.setItem('scrappy_token', data.token);

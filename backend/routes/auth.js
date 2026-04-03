@@ -1,128 +1,111 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const router = express.Router();
+
 const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "scrappy-dev-secret";
-const ADMIN_KEY = process.env.ADMIN_KEY || "ecoscrap-admin";
 
-const normalizeRole = (requestedRole, adminKey) => {
-  if (requestedRole === "admin" && adminKey === ADMIN_KEY) {
-    return "admin";
-  }
-  if (requestedRole === "pickup_partner") {
-    return "pickup_partner";
-  }
-  return "user";
-};
+// =====================
+// ✅ TEST ROUTE
+// =====================
+router.get("/", (req, res) => {
+  res.send("Auth working ✅");
+});
 
-const normalizeStoredRole = (roleValue) => {
-  const normalized = String(roleValue || "user").trim().toLowerCase();
-  if (normalized === "admin") {
-    return "admin";
-  }
-  if (normalized === "pickup_partner") {
-    return "pickup_partner";
-  }
-  return "user";
-};
 
-const buildAuthToken = (user) => {
-  const payload = {
-    id: user._id.toString(),
-    email: user.email,
-    role: normalizeStoredRole(user.role),
-  };
-
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
-};
-
-const handleSignup = async (req, res) => {
+// =====================
+// ✅ REGISTER (SIGNUP)
+// =====================
+router.post("/register", async (req, res) => {
   try {
-    const { email, password, role, adminKey } = req.body;
+    const { email, password, role } = req.body;
 
+    // 1. Validate
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res.status(400).json({ message: "All fields required" });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const existingUser = await User.findOne({ email: normalizedEmail });
-
+    // 2. Check existing user
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const derivedName = normalizedEmail.split("@")[0] || "User";
-    const formattedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
-    const normalizedRole = normalizeRole(role, adminKey);
+    // 3. Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 4. Create user
     const user = new User({
-      name: formattedName,
-      email: normalizedEmail,
-      password,
-      role: normalizedRole,
+      email,
+      password: hashedPassword,
+      role: role || "user",
     });
+
     await user.save();
 
-    return res.status(201).json({
-      message: "Signup successful",
+    // 5. Response
+    res.status(201).json({
+      message: "Signup successful ✅",
       user: {
-        id: user._id,
-        name: user.name,
         email: user.email,
         role: user.role,
       },
     });
-  } catch (error) {
-    return res.status(500).json({ message: "Server error" });
+
+  } catch (err) {
+    console.error("Signup Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
-};
+});
 
-// Keep auth behavior simple so existing working flow does not break.
-router.post("/signup", handleSignup);
-router.post("/register", handleSignup);
 
+// =====================
+// ✅ LOGIN
+// =====================
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // 1. Validate
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res.status(400).json({ message: "All fields required" });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const user = await User.findOne({ email: normalizedEmail });
-
-    if (!user || user.password !== password) {
-      return res.status(400).json({ message: "Invalid credentials" });
+    // 2. Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const userRole = normalizeStoredRole(user.role);
-    user.role = userRole;
-
-    const token = buildAuthToken(user);
-    user.authToken = token;
-
-    if (!user.name) {
-      const nameFromEmail = normalizedEmail.split("@")[0] || "User";
-      user.name = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
+    // 3. Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
     }
-    await user.save();
 
-    return res.json({
-      message: "Login successful",
+    // 4. Generate JWT
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET || "secret123",
+      { expiresIn: "1d" }
+    );
+
+    // 5. Response
+    res.json({
+      message: "Login successful ✅",
       token,
       user: {
-        id: user._id,
-        name: user.name,
         email: user.email,
-        role: userRole,
-        rewardPoints: user.rewardPoints,
+        role: user.role,
       },
     });
-  } catch (error) {
-    return res.status(500).json({ message: "Login failed" });
+
+  } catch (err) {
+    console.error("Login Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
+
 
 module.exports = router;
